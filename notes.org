@@ -1,0 +1,16 @@
+#+TITLE: Notes
+
+** Start Up
+IP address of machine running the app must be used in neuralNet.js and sketch.js corresponding socket requirements.
+
+** Use
+| Key | Actions                                                 |
+|-----+---------------------------------------------------------|
+| D   | Starts train with stored data (if data is available)    |
+| T   | Start training with collected data                      |
+| C   | Turn on collection mode                                 |
+| P   | Save a screenshot in collecting mode                    |
+| F   | Fetches data for training from GitHub (not working yet) |
+
+** Saving Data
+Inside "data folder" there is _data.json_ which contains training data and is stored locally in the machine.

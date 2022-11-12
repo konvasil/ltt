@@ -1,0 +1,1 @@
+{"inputUnits":[2],"outputUnits":2,"inputs":{"x":{"dtype":"number","min":540.3983942579828,"max":1015.7006385315173},"y":{"dtype":"number","min":238.93289471682667,"max":334.57871093305005}},"outputs":{"x":{"dtype":"number","min":12,"max":1436},"y":{"dtype":"number","min":1,"max":899}},"isNormalized":true}
