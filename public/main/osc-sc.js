@@ -36,12 +36,8 @@ let oscFwd = function () {
   if(msg === NaN){
     console.log("NaN values detected or empty string", msg)
   } else {
-
-    //checks for bad values and constructs key-value pairs
-    msg = Object.fromEntries(Object.entries(msg).map(([key, value]) => [key, value]))
+    msg = Object.fromEntries(Object.entries(msg).map(([key, value]) => [key, value.toFixed(2)]))
   }
-
-  //oscPort.on("ready", function () {
     oscPort.send({
       address: '/lick-the-toad', //OSC message path
       args: [
@@ -55,7 +51,6 @@ let oscFwd = function () {
         }
       ]
     })
-  //})
 
   let text = `Data: ${JSON.stringify(msg).replace('{', '(').replace('}', ')').replace(/\"/g, "").replace(/\""/g, "")}`
   document.getElementById("osc-message").innerHTML = text //passes current OSC message to user interface/main index interface.

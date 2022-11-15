@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 const httpServer = require("http").createServer(app);
 const Ball = require('./api/Ball.js');
-let PORT = 8000;
+let PORT = process.env.PORT || 8000; //8000;
 let handshake;
 let clients = {};
 let balls = [];
@@ -124,10 +124,17 @@ app.use(express.static('public'));
 app.use(express.static('main'));
 app.use(express.static('client'));
 app.use(express.static('images'));
-
-app.get('/k-v.png', function(req, res) {
-    res.sendFile(__dirname + '/images/k-v.png'); 
+app.get("/", (req, res) => {
+  res.sendFile("public/main/index.html", { root: __dirname })
 })
+app.get("/", (req, res) => {
+  res.sendFile("public/main/index.css", { root: __dirname })
+})
+app.get('/k-v.png', function(req, res) {
+    res.sendFile(__dirname + '/images/k-v.png', {root: __dirname }); 
+})
+
+
 
 app.get('/socket.io.min.js', function(req, res) {
     res.sendFile(__dirname + '/node_modules/socket.io/client-dist/socket.io.min.js');
