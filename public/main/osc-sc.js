@@ -2,7 +2,7 @@
 
 
 var oscPort = new osc.WebSocketPort({
-  url: "ws://localhost:8081"
+  url: "wss://localhost:8081"
 });
 
 //receiving OSC
