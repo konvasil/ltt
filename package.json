@@ -3,6 +3,7 @@
  "version":"1.0.0",
  "engines": {
    "node": "19.x",
+   "npm": "8.x"
  },
  "description":"neural nets, regression, sonification",
  "main":"app.js",
