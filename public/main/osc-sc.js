@@ -2,7 +2,7 @@
 
 
 var oscPort = new osc.WebSocketPort({
-  url: "ws://lick-the-toad.netlify.app:8081"
+  url: "wss://lick-the-toad.netlify.app:8081"
 });
 
 //receiving OSC
