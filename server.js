@@ -76,7 +76,8 @@ udpPort.on("ready", function (oscMsg, timeTag, info) {
   });*/
 
 const wss = new WebSocket.Server({
-    port:8081
+    //port:8081 //locallly
+    server: https://lick-the-toad.netlify.app:8081
 });
 
 wss.on("connection", function (socket) {
