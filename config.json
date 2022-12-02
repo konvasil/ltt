@@ -1,6 +1,6 @@
 {
-    "clientAddress": "https://lick-the-toad.netlify.app/",
+    "clientAddress": "0.0.0.0",
     "clientPort": 57121,
-    "appAddress": "160.75.76.133",
+    "appAddress": "127.0.0.1",
     "appPort": 57120
 }
