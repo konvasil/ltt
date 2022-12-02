@@ -2,9 +2,8 @@
 
 
 var oscPort = new osc.WebSocketPort({
-  url: "ws://192.168.1.102:8081"
+  url: "ws://localhost:8081"
 });
-
 
 //receiving OSC
 /*oscPort.on("message", function(msg) {
@@ -18,25 +17,25 @@ var oscPort = new osc.WebSocketPort({
   }
   })*/
 
-oscPort.on("message", function(oscMsg) {
+/*oscPort.on("message", function(oscMsg) {
   console.log("OSC msg received: ", oscMsg)
   document.getElementById("in-osc-message").innerHTML = "Incoming OSC: " + JSON.stringify(oscMsg, undefined, 2)
-})
+})*/
 
 oscPort.open()
 
 //default msg starting values
 msg = {
   freq: Math.floor(Math.random() * 220) + 120,
-  cursor_x: 0.5,
-  cursor_y: 0.5
+  cursor_x: Math.floor(Math.random() * 1000),
+  cursor_y: Math.floor(Math.random() * 1000)
 }
 
 let oscFwd = function () {
   if(msg === NaN){
     console.log("NaN values detected or empty string", msg)
   } else {
-    msg = Object.fromEntries(Object.entries(msg).map(([key, value]) => [key, value.toFixed(2)]))
+    msg = Object.fromEntries(Object.entries(msg).map(([key, value]) => [key, value]))
   }
     oscPort.send({
       address: '/lick-the-toad', //OSC message path
@@ -53,11 +52,12 @@ let oscFwd = function () {
     })
 
   let text = `Data: ${JSON.stringify(msg).replace('{', '(').replace('}', ')').replace(/\"/g, "").replace(/\""/g, "")}`
-  document.getElementById("osc-message").innerHTML = text //passes current OSC message to user interface/main index interface.
 }
 
+
+
 //osc tester
-sendOSC = function() {oscPort.on("ready", function() {oscPort.send({address: "/hello", args: ["world"]})})}
-sendOSC()
+//sendOSC = function() {oscPort.on("ready", function() {oscPort.send({address: "/hello", args: ["world"]})})}
+//sendOSC()
 //msg = JSON.stringify(msg).replace('{', '(').replace('}', ')').replace(/\"/g, "").replace(/\""/g, "")
 //oscFwd()

@@ -1,4 +1,5 @@
 const config_file = process.argv[2] ? process.argv[2] : './config.json';
+const path = require('node:path');
 const config = require(config_file);
 const express = require('express')
 const cors = require('cors');
@@ -13,10 +14,9 @@ let balls = [];
 var osc = require('osc'),
     WebSocket = require('ws');
 
-//console.log(app.set('port', process.env.SOCKETS_PORT || 8000))
-
 let server = httpServer.listen(PORT, () => {
-    console.info(`App listening on port ${PORT}`)
+    console.log(`App running on`, getIPAddresses())
+    console.log(`Listening at`, PORT)
 })
 
 
@@ -43,11 +43,11 @@ var getIPAddresses = function () {
 };
 
 var udpPort = new osc.UDPPort({
-    localAddress: "0.0.0.0",
-    localPort: 57121,
-    remoteAddress: "127.0.0.1",
-    remotePort: 57120
-});
+    localAddress: config.clientAddress,
+    localPort: config.clientPort,
+    remoteAddress: config.appAddress,
+    remotePort: config.appPort
+})
 
 udpPort.open()
 
@@ -80,7 +80,7 @@ const wss = new WebSocket.Server({
 });
 
 wss.on("connection", function (socket) {
-    console.log("A Web Socket connection has been established!");
+    // console.log("A Web Socket connection has been established!");
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
@@ -134,8 +134,6 @@ app.get('/k-v.png', function(req, res) {
     res.sendFile(__dirname + '/images/k-v.png', {root: __dirname }); 
 })
 
-
-
 app.get('/socket.io.min.js', function(req, res) {
     res.sendFile(__dirname + '/node_modules/socket.io/client-dist/socket.io.min.js');
 })
@@ -147,6 +145,12 @@ app.get('/osc-browser.min.js', function(req, res) {
 app.get('/CCapture.all.min.js', function(req, res) {
     res.sendFile(__dirname + '/node_modules/ccapture.js/build/CCapture.all.min.js');
 })
+
+app.get('/react-button.js', function(req, res) {
+    res.sendFile(__dirname + '/public/main/chat/react-button.js');
+})
+
+app.use('/chat', express.static(path.join(__dirname, '/chat-vueapp/chat/public/src')));
 
 udpPort.on("message", (oscMsg) => {
     console.log("An OSC message just arrived!", oscMsg.args);
@@ -160,11 +164,19 @@ setInterval( heartbeat, 33 )
 
 let ball;
 
+let client = 0;
+
 io.sockets.on('connection', (socket) => {
 
-    clients[socket.id] = socket;
+    console.log(socket.id + ' has connected: ' +  socket.client.conn.server.clientsCount) //Main Users
 
-    console.log(socket.client.conn.server.clientsCount + " users connected " + socket.id);
+    client++
+
+    socket.emit('newclientconnect',{ description: 'Welcome!', guests: client});
+    socket.broadcast.emit('newclientconnect',{ description: client + ' clients connected!', guests: client})
+    //io.sockets.emit('broadcast',{ description: client + ' clients connected!'})
+
+    clients[socket.id] = socket;
 
     socket.on('new_ball', (data) => {
 
@@ -193,9 +205,14 @@ io.sockets.on('connection', (socket) => {
         ball.r = data.r
     })
 
+    socket.on('chat message', (msg) => {
+        io.emit('chat message', msg);
+        console.log('message: ' + msg);
+    });
+
     socket.on('disconnect', (cause) => {
         const index = balls.findIndex(ball => ball.id === socket.id)
-        const  usersCount = socket.client.conn.server.clientsCount
+        let usersCount = socket.client.conn.server.clientsCount
 
         try {
             balls.splice(index, 1)
@@ -204,7 +221,10 @@ io.sockets.on('connection', (socket) => {
             console.error(error)
         }
 
-        console.info("user disconnected reason: " + cause, "-", usersCount + " remained", balls.length);
+        client--
+        socket.broadcast.emit('newclientconnect', { description: client + ' Clients Disconnected!', guests: client});
+        console.log(socket.id +  ' disconnected: \n ' + cause + ' remained ' + usersCount) //Main Users
+        //console.info("user disconnected reason: " + cause, "-", usersCount + " remained", balls.length); //Ball Users
         if(usersCount == 0){
             console.log('waiting users to log in');
         }
