@@ -2,7 +2,7 @@
 
 
 var oscPort = new osc.WebSocketPort({
-  url: "wss://localhost:8081"
+  url: "ws://lick-the-toad.herokuapp.com:8081"
 });
 
 //receiving OSC
