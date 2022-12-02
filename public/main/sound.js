@@ -33,7 +33,6 @@ const synth = new Tone.AMSynth({
 startAudio = function(){
   Tone.start()
   console.log("audio started")
-  document.getElementById("sound-mute").innerHTML = "Sound: Started"
 }
 
 synth.connect(pitchShift);
