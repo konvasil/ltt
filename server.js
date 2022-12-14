@@ -54,9 +54,11 @@ udpPort.open()
 udpPort.on("ready", function (oscMsg, timeTag, info) {
     var ipAddresses = getIPAddresses();
     console.log("Listening for OSC over UDP.");
+
     ipAddresses.forEach(function (address) {
         console.log(" Host:", address + ", Port:", udpPort.options.localPort)
     })
+
 });
 
 /*udpPort.on("ready", function () {
@@ -77,7 +79,7 @@ udpPort.on("ready", function (oscMsg, timeTag, info) {
 
 const wss = new WebSocket.Server({
     port:8081
-});
+})
 
 wss.on("connection", function (socket) {
     // console.log("A Web Socket connection has been established!");
@@ -118,12 +120,13 @@ const io = require("socket.io")(server, {
         credentials: true,
         optionsSuccessStatus: 200
     }
-})
+});
 
 app.use(express.static('public'));
 app.use(express.static('main'));
 app.use(express.static('client'));
 app.use(express.static('images'));
+
 app.get("/", (req, res) => {
   res.sendFile("public/main/index.html", { root: __dirname })
 })
@@ -146,11 +149,13 @@ app.get('/CCapture.all.min.js', function(req, res) {
     res.sendFile(__dirname + '/node_modules/ccapture.js/build/CCapture.all.min.js');
 })
 
-app.get('/react-button.js', function(req, res) {
-    res.sendFile(__dirname + '/public/main/chat/react-button.js');
+app.get('/index.html', function(req, res) {
+    res.sendFile(__dirname + '/public/main/index.html');
 })
 
-app.use('/chat', express.static(path.join(__dirname, '/chat-vueapp/chat/public/src')));
+app.get('user-interface.js', function(req, res) {
+    res.sendFile(__dirname + '/public/main/components/');
+})
 
 udpPort.on("message", (oscMsg) => {
     console.log("An OSC message just arrived!", oscMsg.args);

@@ -9,4 +9,6 @@
 thisProcess.addOSCRecvFunc(~listener);
 )
 
-NetAddr("localhost",57121).sendMsg('/usr-kv', rrand(0.1, 1.0).asString)
+NetAddr("localhost", 5712).sendMsg('/usr-kv', *{rrand(0.1, 1.0)}!4);
+
+1+1

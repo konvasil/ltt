@@ -1,6 +1,12 @@
-let state = 'waiting', predictionMode = 'automatic', xoff = 0.0, speedCursor = 0.001, speedSlider, modelInfo, socket, brain, cursor = {}, button, inputs = [], oscObjMsg = {}, msg = {}, trainData = [], canvas, t = 0, noiseScale = 0.02, noiseVal = 0.0;
+let state = 'waiting', predictionMode = 'automatic', xoff = 0.0, speedCursor = 0.01, speedSlider, modelInfo, socket, brain, cursor = {}, button, inputs = [], trainData = [], canvas, t = 0, noiseScale = 0.02, noiseVal = 0.0;
 let angle = 0.0;
 let jitter = 0.0;
+
+msg = {
+  freq: Math.floor(Math.random() * 220) + 120,
+  cursor_x: Math.floor(Math.random() * 1000),
+  cursor_y: Math.floor(Math.random() * 1000)
+}
 
 let tempo = 10;
 
@@ -17,13 +23,13 @@ const options = {
 }
 
 const trainingOptions = {
-    epochs: 10,
+    epochs: 60,
     batchSize: 12
 } 
 
 function setup(){
     //canvas = createCanvas(windowWidth/2, windowHeight/3, WEBGL)
-    canvas = createCanvas(windowWidth, windowHeight/3)
+    canvas = createCanvas(800, 280)
     noStroke()
     //fill(255);
     //Draw the rectangle from the center and it will also be the
@@ -105,7 +111,7 @@ function sleep(ms){
 
 async function keyPressed(){
     if (key == 'p') {
-        saveCanvas(canvas, 'VizData-lickTheToad', 'jpg');
+        saveCanvas(canvas, 'lickTheToad', 'jpg');
     }
 
     if (key == 's') {
@@ -212,7 +218,7 @@ function drawCursor() {
         }
         fill(255)
         stroke(255, 18)
-        text("Freq Out: " + msg.freq.toFixed(2), cursor.x, cursor.y)
+        text("Data: " + msg.freq.toFixed(2) + JSON.stringify(cursor), cursor.x, cursor.y)
         line(cursor.x, 0, cursor.x, height)
         line(0, cursor.y, width, cursor.y)
 
@@ -227,8 +233,8 @@ function drawCursor() {
         fill(255)
         stroke(255, 18)
         text("Freq Out: " + msg.freq, cursor.x, cursor.y)
-        line(cursor.x, 0, cursor.x, height)
-        line(0, cursor.y, width, cursor.y)
+        line(cursor.x, 0.0, cursor.x, height)
+        line(0.0, cursor.y, width, cursor.y)
     }
 }
 
@@ -288,30 +294,23 @@ function drawTrainedData () {
 
     let data = brain.data.training;
     
-    let radius = 16
+    let radius = 12
 
     for(let i=0; i<data.length; i++){
-        let x1 = map(data[i].xs.x, 0, 1, 0, width-radius)
-        let y1 = map(data[i].xs.y, 0, 1, 0, height-radius)
-        //translate(canvasWidth/4, canvasHeight/3)
-        translate(p5.Vector.fromAngle(millis() / 2000, 80));
-        //rotateZ(millis() / 2000);
-        let spots = ellipse(x1-radius, y1-radius, radius);
+        let x1 = map(data[i].xs.x, 0.0, 1.0, 0.0, width)
+        let y1 = map(data[i].xs.y, 0.0, 1.0, 0.0, height)
+        let spots = ellipse(x1, y1, radius, radius)
         text(JSON.stringify(data[i].ys.freq.toFixed(2)), x1+2 + radius, y1+2 + radius) /*appears as normalized data after training (0.0 - 1.0)*/
+        //translate(p5.Vector.fromAngle(millis() / 2000, 80));
+        //rotateZ(millis() / 2000)
 
-        for(let j=0; j<data.length; j++){
-            let x2 = map(data[j].xs.x, 0, 1, 0, width-radius)
-            let y2 = map(data[j].xs.y, 0, 1, 0, height-radius)
-
-            let xnoise1 = width / 2 * noise(t + 35)
-            let ynoise1 = y1 * noise(t + 75)
-            let xnoise2 = width / 2 * noise(t + 35)
-            let ynoise2 = y2 * noise(t + 75)
-            let noiseVal = noise((x1 + i) * noiseScale, y1 * noiseScale)
-            stroke(noiseVal * 255, 18)
-            line(x1-radius, y1-radius, x2-radius, y2-radius)
+        for(let j=0; j<data.length; j++){          
+            let x2 = map(data[j].xs.x, 0.0, 1.0, 0.0, width)
+            let y2 = map(data[j].xs.y, 0.0, 1.0, 0.0, height)
+            line(x1, y1, x2, y2)
         }
     }
+    
     if (frameCount % 500 == 0){
         background(255)
     }
@@ -331,22 +330,8 @@ function draw() {
         rectMode(CENTER);
         background(51);
         noFill();
-        // during even-numbered seconds (0, 2, 4, 6...) add jitter to
-        // the rotation
-        //if (second() % 2 === 0) {
-        //    jitter = random(-0.1, 0.1);
-        //}
-        //increase the angle value using the most recent jitter value
-        //angle = angle + jitter;
-        //use cosine to get a smooth CW and CCW motion when not jittering
-        //let c = cos(angle);
-        //move the shape to the center of the canvas
-        translate(width / 2, height / 2);
-        //apply the final rotation
-        //rotate(c);
-
-        drawTrainedData()
         drawCursor()
+        drawTrainedData()
     }
 }
 

@@ -9,28 +9,30 @@ s.doWhenBooted({
 
 
 	var oldMsg;
+
 	~dict = IdentityDictionary.new;
 
 	OSCdef(\onlyIfChanged, { arg ...msg;
 
-		var array = msg[0].drop(1).postln;
+		var array = msg[0].
 
 		if(oldMsg != array, {
 			//"no dups found: %".format(array).postln;
-			~oscDict.value(array)
-		});
+			~oscDict.value(array);
+		}, '/);
 
-		oldMsg = array
-	}, '/lick');
+		oldMsg = array;
+	});
 
 	~oscDict = {|array|
-		[\rgrsn, \xpos, \ypos].do({|item, i|
+		[\0, \1, \2, \3].do({|item, i|
 			~dict.add(item -> array[i])
 		});
 
 		~offsetVals = ~dict.values.array.round(0.1) / 1860.0 * 100;
 	};
-
+}
+))
 	//test SynthDef
 
 	SynthDef(\sinegrain,
@@ -40,13 +42,14 @@ s.doWhenBooted({
 			Out.ar(out, Pan2.ar(SinOsc.ar(freq, 0.5pi, env), pan))
 		}).add;
 
+~list = [1, 2, 3, 4]
 
-	Pbindef('x',
-		\instrument, \sinegrain,
-		\dur, 0.12,
-		\sustain, Pwhite(0.1, Pkey(\dur), inf),
-		\note, Pfunc{ Pxrand(~offsetVals, inf, 0.1).asStream.next }
-	);
+Pbindef('x',
+	\instrument, \sinegrain,
+	\dur, 0.75,
+	\sustain, Pwhite(0.1, Pkey(\dur), inf),
+	\note, Pfunc{ Pxrand(~list * 2, inf).asStream.next }
+).trace;
 
 	Pbindef(\x).play(quant:(time:2, quant:2, phase:1.rand));
 
@@ -60,7 +63,7 @@ s.doWhenBooted({
 });
 
 
-b = Buffer.alloc(s, s.sampleRate / Server.default.options.blockSize*2);
+b = Buffer.alloc(s, s.sampleRate * 1.0, 2);
 p = BuffPlot(b, updateRate:20).play;
 )
 
@@ -71,8 +74,23 @@ Spec.add(\freq, [-1, 0.99]);
 Ndef(\rec, {RecordBuf.kr( \freq.kr(0.0, 0.01), b)}).play;
 Ndef(\playbuf, {LFPar.ar(PlayBuf.kr(1, b, loop: 1).range(100, 500), 0, 0.1).dup}).play(0, 1);
 NdefMixer(s);
-Ndef(\playbuf)[1] = \xset -> Pbind(\dur, 0.5, \freq, Pfunc{ Pxrand(~offsetVals / 100, inf) } ).trace
+
+Ndef(\playbuf)[1] = \xset -> Pbind(\dur, 0.5, \freq, Pfunc{ Pxrand(~sliders.collect(_.value), inf) }).trace;
+
+(
+Tdef(\x, {
+	var data;
+	loop{
+	2.wait;
+		{data = ~sliders.collect(_.value).postln}.defer;
+		~list = data;
+	}
+}).play;
 )
+
+
+
+
 
 )
 

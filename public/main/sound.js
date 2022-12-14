@@ -1,27 +1,45 @@
-const reverbMaster = new Tone.Reverb(0.15).toDestination()
-const pitchShift = new Tone.PitchShift(40, 0.25, 0.7, 120).connect(reverbMaster)
-//const filter = new Tone.Filter().connect(reverbMaster);
-const feedbackDelay = new Tone.FeedbackDelay(0.9, 0.9).connect(pitchShift);
-const distortion = new Tone.Distortion(0.25).connect(reverbMaster);
-const fb = new Tone.FeedbackCombFilter(0.1, 0.5).connect(pitchShift);
+//const reverbMaster = new Tone.Reverb(0.15).toDestination()
+//const pitchShift = new Tone.PitchShift(4, 0.25, 0.7, 12).toDestination();
+//const filter = new Tone.Filter().toDestination();
+//const feedbackDelay = new Tone.FeedbackDelay(Math.random(), 0.5).toDestination()
+//const distortion = new Tone.Distortion(0.25).connect(reverbMaster);
+//const fb = new Tone.FeedbackCombFilter(0.1, 0.5).connect(pitchShift);
+//pitchShift.numberOfOutputs = 2;
 
-pitchShift.numberOfOutputs = 2;
+/*const voices = {
+  synth_fm: ,
+  synth_am: 'amsynth'
+}
+*/
 
-const synth = new Tone.AMSynth({
-  oscillator : {
-    volume: 5,
-    count: 3,
-    spread: 40,
-    type : "sine",
-    modulationType: "sawtooth",
-    harmonicity: 3.4,
-    partials: 4
-  },
-  envelope : {
-    attack : 0.1,
-    release : 0.75
+//const synth = new Tone.PolySynth(Tone.FMSynth,  12).toDestination();
+
+
+Volume = new Tone.Volume(-12)
+synth = new Tone.PolySynth(Tone.Synth).chain(Volume, Tone.Destination);
+
+synth.set({
+  envelope: {
+    attack: 0.099,
+    decay: 1,
+    release: 0.25
   }
-})
+});
+
+/*Tone.Synth({
+    oscillator : {
+      volume: 5,
+      count: 3,
+      spread: 40,
+      type : "sine",
+      modulationType: "sawtooth",
+      harmonicity: Math.floor(Math.random() * 2) + 10,
+      partials: 4
+    },
+    envelope : {
+      attack : 0.1
+    }
+  })*/
 
 /*filter.set({
   frequency: "1500",
@@ -35,27 +53,33 @@ startAudio = function(){
   console.log("audio started")
 }
 
-synth.connect(pitchShift);
-synth.connect(feedbackDelay);
-synth.connect(distortion)
-synth.connect(fb)
-synth.connect(reverbMaster)
+
+//synth.connect(pitchShift);
+//synth.connect(feedbackDelay);
+//synth.connect(distortion)
+//synth.connect(fb)
+//synth.connect(reverbMaster)
+//synth.connect(filter)
 
 var updateHarmonics = function () {
-  let pars = synth.oscillator.partials = new Array(4).fill(0).map(() => Math.random())
+  array = new Array(3).fill(0).map(() => Math.random());
+
+  let pars = synth.options.oscillator.partials = array;
+  
   for(var i = 0; i < pars.length; i++){
-    synth.oscillator.phase = (pars[i] * Math.floor(Math.random() * (Math.PI - 0.1 + 0.25) + 0.1))
+    synth.phase = (pars[i] * Math.floor(Math.random() * (Math.PI - 0.1 + 0.25) + 0.1))
   }
   document.getElementById("update-harmx").innerHTML = "Harmonics: " + pars.map((p) => p.toFixed(2), undefined, 2) //round function in decimals
 }
 
 var playDrone = function () {
-  const now = Tone.now()
+  notes = Object.values(msg).map(p => Tone.Frequency(p).toMidi())
   if(Tone.Transport.state == 'started')
   {
     console.log("a pattern is playing", "wait");
   } else {
-    synth.triggerAttackRelease(parseFloat(msg.freq.toFixed(2)), 3, now)
+    synth.triggerAttackRelease(notes, 3);
+    document.getElementById("pause-play").innerHTML = "Drone: " + Tone.Frequency(msg.freq, "midi").toNote();
   }
 }
 
@@ -87,34 +111,29 @@ tempoChange = function(tempo){
     //Math.floor(Math.random() * (120 - 4 + 1) + 60)
 }
 
-triggerNote = function(note, dur) {
-  var now = Tone.now();
-  synth.triggerAttackRelease(note, dur, now)
-}
 
-function playPattern (note_list, hidePlay, id, sound) {
-
-  note_list = Object.values(msg)
-  
-  midi_list = note_list.map(notes => Math.abs(Tone.Frequency(notes).toMidi()));
-  document.getElementById("play-pat").innerHTML = "notes: " + JSON.stringify(midi_list);
-  last_note = midi_list.length;
+function playPattern (notes) {
+  let note_list = notes //genMarkov() //Object.values(msg)
+  let midi_list = note_list.map(notes => Math.abs(Tone.Frequency(notes, "midi").toMidi()));
+  let last_note = midi_list.length;
   count = 0;
 
-  var pattern = new Tone.Sequence(function(time, note) {
+  const seq = new Tone.Sequence((time, note) => {
+    synth.triggerAttackRelease(note, 0.3, time)
 
-    triggerNote(note, 0.25);
     count = count + 1;
 
     if (count === last_note) {
       console.log("finished!");
-      pattern.stop();
+      seq.stop(0);
       Tone.Transport.stop();
+      try {
+      } finally {
+        console.log(synth.releaseAll(), 'synth released')
+      }
     }
 
-  }, midi_list);
-
-  pattern.start(0).loop = false;
+  }, midi_list).start(0);
 
   console.log(midi_list);
   Tone.Transport.start();
