@@ -1,5 +1,15 @@
 #+TITLE: Notes
 
+* Client Use instructions
+** Train the model of the neural network
+Press key: d on your keyboard
+*** wait the system to complete the training process.
+** Create sound
+Press button: 'Markov Train' and see the prediction on the interface.
+Now you can start playing the notes by pressing either OSC or Markov's notes.
+*** you can either play notes in sequence or a single note.
+
+* Admin instructions
 ** Start Up
 IP address of machine running the app must be used in neuralNet.js and sketch.js corresponding socket requirements.
 
@@ -14,3 +24,7 @@ IP address of machine running the app must be used in neuralNet.js and sketch.js
 
 ** Saving Data
 Inside "data folder" there is _data.json_ which contains training data and is stored locally in the machine.
+
+
+
+**** Thank you the Lick team.
