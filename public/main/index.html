@@ -6,16 +6,22 @@
   <body>
     <title>Licking toad 🐸</title>
 
-    <div id="app">{{ title }} <br></br> Hello: {{user_id}} <br></br> Connected: {{connected_users}} <br></br>
+    <div id="app">{{ title }} <br></br>
+      Hello: {{user_id}} <br></br>
+      Connected: {{connected_users}} <br></br>
+      Drone notes: {{droneNotes}} <br></br>
+      Markov's state: {{markovState}} <br></br>
       <!--Address: {{ form.ip }} <input type="text" v-model="ip" placeholder="ip" />
       Port: {{ form.port }} <input type="number" v-model="port" placeholder="port" /> <br></br> -->
-      OSC: {{ osc_msg }} {{osc_incoming}}<br></br>
+      OSC: {{ osc_msg }} {{osc_incoming}} <br></br>
       Markov's state: {{markov_state}} <br></br>
-      <button @click="submit(ip, port)">Submit</button>
+       <button @click="startAudio()">Start Audio</button>
+      <!--<button @click="submit(ip, port)">Submit</button> -->
       <button @click="osc_out()">OSC</button>
       <form @submit.prevent="submit"></form>
       <button @click="markov_train()">Markov's Train</button>
       <button @click="markov_notes()">Markov's Notes Play</button>
+      <button @click="playDrone()">Play Drone</button>
       <div>Voice: {{ synth_picked }}</div>
       <input type="radio" id="sine" value="Sine" @change="switch_synth('sine')" v-model="synth_picked" />
       <label for="sine">Sine</label>
@@ -88,7 +94,7 @@
     }
 
     var oscPort = new osc.WebSocketPort({
-      url: "ws://localhost:8081"
+    url: "ws://localhost:8081", // URL to your Web Socket server.
     });
 
     oscPort.open()
@@ -147,8 +153,6 @@
 
   </script>
   <button id="start-audio" onclick="startAudio()">  Start Audio </button>
-  <button id="pause-play" onclick="playDrone()"> Drone </button>
-  <button id="update-harmx" onclick="updateHarmonics()"> Harmonics </button>
 
   <style>
     #app {

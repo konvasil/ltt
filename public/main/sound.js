@@ -61,25 +61,13 @@ startAudio = function(){
 //synth.connect(reverbMaster)
 //synth.connect(filter)
 
-var updateHarmonics = function () {
-  array = new Array(3).fill(0).map(() => Math.random());
-
-  let pars = synth.options.oscillator.partials = array;
-  
-  for(var i = 0; i < pars.length; i++){
-    synth.phase = (pars[i] * Math.floor(Math.random() * (Math.PI - 0.1 + 0.25) + 0.1))
-  }
-  document.getElementById("update-harmx").innerHTML = "Harmonics: " + pars.map((p) => p.toFixed(2), undefined, 2) //round function in decimals
-}
-
-var playDrone = function () {
-  notes = Object.values(msg).map(p => Tone.Frequency(p).toMidi())
+var trigDrone = function (notes) {
+  notes = Object.values(notes).map(p => Tone.Frequency(p).toMidi())
   if(Tone.Transport.state == 'started')
   {
     console.log("a pattern is playing", "wait");
   } else {
-    synth.triggerAttackRelease(notes, 3);
-    document.getElementById("pause-play").innerHTML = "Drone: " + Tone.Frequency(msg.freq, "midi").toNote();
+    synth.triggerAttackRelease(notes, 3)
   }
 }
 
