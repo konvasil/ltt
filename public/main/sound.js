@@ -1,10 +1,17 @@
-//const reverbMaster = new Tone.Reverb(0.15).toDestination()
-//const pitchShift = new Tone.PitchShift(4, 0.25, 0.7, 12).toDestination();
-//const filter = new Tone.Filter().toDestination();
-//const feedbackDelay = new Tone.FeedbackDelay(Math.random(), 0.5).toDestination()
-//const distortion = new Tone.Distortion(0.25).connect(reverbMaster);
-//const fb = new Tone.FeedbackCombFilter(0.1, 0.5).connect(pitchShift);
-//pitchShift.numberOfOutputs = 2;
+const rverb = new Tone.Reverb(0.1).toDestination();
+const fb = new Tone.FeedbackCombFilter(0.1, 0.6).toDestination();
+
+var shift = new Tone.PitchShift(-12).toDestination()
+shift.numberOfOutputs = 2;
+
+var lfo = new Tone.LFO();
+
+lfo.connect(fb.delayTime);
+lfo.connect(shift.delayTime);
+lfo.connect(shift.feedback);
+
+lfo.start();
+
 
 /*const voices = {
   synth_fm: ,
@@ -15,14 +22,12 @@
 //const synth = new Tone.PolySynth(Tone.FMSynth,  12).toDestination();
 
 
-Volume = new Tone.Volume(-12)
-synth = new Tone.PolySynth(Tone.Synth).chain(Volume, Tone.Destination);
+Volume = new Tone.Volume(-1)
+synth = new Tone.PolySynth(Tone.Synth).chain(Volume, rverb, shift, fb,  Tone.Destination);
 
 synth.set({
   envelope: {
-    attack: 0.099,
-    decay: 1,
-    release: 0.25
+    attack: 0.25
   }
 });
 
@@ -45,8 +50,6 @@ synth.set({
   frequency: "1500",
   type: "highpass"
 });*/
-
-//synth.connect(filter)
 
 startAudio = function(){
   Tone.start()
@@ -102,7 +105,10 @@ tempoChange = function(tempo){
 
 function playPattern (notes) {
   let note_list = notes //genMarkov() //Object.values(msg)
-  let midi_list = note_list.map(notes => Math.abs(Tone.Frequency(notes, "midi").toMidi()));
+
+  lfo.set({frequency: notes[0]/1000.0, min:notes[1]/1000.0, max:notes[2]/1000.0});
+
+  let midi_list = note_list.map(notes => Math.abs(Tone.Frequency(notes, "midi").toMidi() ));
   let last_note = midi_list.length;
   count = 0;
 
@@ -113,13 +119,14 @@ function playPattern (notes) {
 
     if (count === last_note) {
       console.log("finished!");
-      seq.stop(0);
+      seq.stop();
       Tone.Transport.stop();
-      try {
-      } finally {
-        console.log(synth.releaseAll(), 'synth released')
-      }
     }
+
+    try {
+      } finally {
+        console.log("done", 'synth released')
+      }
 
   }, midi_list).start(0);
 

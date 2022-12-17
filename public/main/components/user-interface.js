@@ -10,9 +10,9 @@ export default {
       connected_users: 0,
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
-      wave_form: {sine:'sine', triangle:'triangle', sawtooth:'sawtooth', square:'square'},
+      waveform: "",
       osc_incoming: "",
-      synth_picked: '',
+      synth_picked: 'sine',
       droneNotes: 'notes',
       markovState: 'false',
       markov: new Markov('numeric'),
@@ -34,8 +34,7 @@ export default {
       console.log('Submitted: ', this.form);
     },
     startAudio() {
-      Tone.start();
-      console.log("audio started")
+      startAudio();
     },
     osc_out () {
       if(this.markovState !== 'false'){
@@ -53,8 +52,8 @@ export default {
       }
     },
     switch_synth(synth_id) {
-      synth.set({oscillator: {type: this.wave_form[synth_id]}});
-      console.log(synth.options.oscillator.type)
+      synth.set({oscillator: {type: synth_id}});
+      console.log(synth.options.oscillator.type);
     },
     markov_notes () {
       if(this.markovState !== 'false') {
@@ -98,6 +97,7 @@ export default {
     }
   },
   created() {
+    this.markov_train()
     socket.on('newclientconnect', (data) => {
       this.connected_users = data.guests
     });
@@ -110,7 +110,6 @@ export default {
         this.osc_incoming = oscMsg;
       }
     });
-    //this.markov.addStates({state: msg.freq, predictions: Object.values(msg)})
   },
   updated() {
     this.user_id = socket.id

@@ -10,11 +10,11 @@
       Hello: {{user_id}} <br></br>
       Connected: {{connected_users}} <br></br>
       Drone notes: {{droneNotes}} <br></br>
-      Markov's state: {{markovState}} <br></br>
+      Markov's state: {{markovState}} {{markov_state}} <br></br>
       <!--Address: {{ form.ip }} <input type="text" v-model="ip" placeholder="ip" />
       Port: {{ form.port }} <input type="number" v-model="port" placeholder="port" /> <br></br> -->
       OSC: {{ osc_msg }} {{osc_incoming}} <br></br>
-      Markov's state: {{markov_state}} <br></br>
+
        <button @click="startAudio()">Start Audio</button>
       <!--<button @click="submit(ip, port)">Submit</button> -->
       <button @click="osc_out()">OSC</button>
@@ -31,6 +31,9 @@
       <label for="sawtooth">Saw</label>
        <input type="radio" id="square" value="Square" @change="switch_synth('square')" v-model="synth_picked" />
       <label for="square">Square</label>
+      <div id="sketch-holder">
+      <!-- My P5JS Canvas is here! -->
+    </div>
     </div>
 
     <script type="module">
@@ -44,7 +47,6 @@
     <a href="https://konvas.netlify.app/">KonVas</a>
 </p>
 <button id="random-url" onclick="randomURL()"> Some Random Info </button>
-<div id="sketch-holder">
 
   <!-- AngularJS Material CSS now available via Google CDN; version 1.2.1 used here -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -151,7 +153,6 @@
     */
 
   </script>
-  <button id="start-audio" onclick="startAudio()">  Start Audio </button>
 
   <style>
     #app {

@@ -1,4 +1,4 @@
-let state = 'waiting', predictionMode = 'automatic', xoff = 0.0, speedCursor = 0.01, speedSlider, modelInfo, socket, brain, cursor = {}, button, inputs = [], trainData = [], canvas, t = 0, noiseScale = 0.02, noiseVal = 0.0;
+let state = 'waiting', predictionMode = 'automatic', xoff = 0.0, speedCursor = 0.01, speedSlider, modelInfo, socket, brain, cursor = {}, button, inputs = [], trainData = [], t = 0, noiseScale = 0.02, noiseVal = 0.0;
 let angle = 0.0;
 let jitter = 0.0;
 
@@ -23,19 +23,14 @@ const options = {
 }
 
 const trainingOptions = {
-    epochs: 60,
+    epochs: 10,
     batchSize: 12
 } 
 
 function setup(){
-    //canvas = createCanvas(windowWidth/2, windowHeight/3, WEBGL)
-    canvas = createCanvas(800, 280)
-    noStroke()
-    //fill(255);
-    //Draw the rectangle from the center and it will also be the
-    // Move the canvas so it’s inside our <div id="sketch-holder">.
+    var canvas = createCanvas(windowWidth/2, windowHeight/2)
     canvas.parent('sketch-holder')
-    //noFill()
+   
     t = 0
     tempo = 120
 
@@ -294,19 +289,22 @@ function drawTrainedData () {
 
     let data = brain.data.training;
     
-    let radius = 12
+    let radius = 7;
 
     for(let i=0; i<data.length; i++){
-        let x1 = map(data[i].xs.x, 0.0, 1.0, 0.0, width)
-        let y1 = map(data[i].xs.y, 0.0, 1.0, 0.0, height)
-        let spots = ellipse(x1, y1, radius, radius)
-        text(JSON.stringify(data[i].ys.freq.toFixed(2)), x1+2 + radius, y1+2 + radius) /*appears as normalized data after training (0.0 - 1.0)*/
-        //translate(p5.Vector.fromAngle(millis() / 2000, 80));
-        //rotateZ(millis() / 2000)
+        let x1 = map(data[i].xs.x, 0.0, 1.0, 0.0, width) //data range: 0-1
 
+        let y1 = map(data[i].xs.y, 0.0, 1.0, 0.0, height) //data range: 0-1
+        
+        let spots = ellipse(x1, y1, radius)
+        
+        text(JSON.stringify(data[i].ys.freq.toFixed(2)), x1+2 + radius, y1+2 + radius) /*appears as normalized data after training (0.0 - 1.0)*/
+       
         for(let j=0; j<data.length; j++){          
-            let x2 = map(data[j].xs.x, 0.0, 1.0, 0.0, width)
-            let y2 = map(data[j].xs.y, 0.0, 1.0, 0.0, height)
+           let x2= map(data[j].xs.x, 0.0, 1.0, 0.0, width) //data range: 0-1
+
+            let y2 = map(data[j].xs.y, 0.0, 1.0, 0.0, height) //data range: 0-1
+
             line(x1, y1, x2, y2)
         }
     }
@@ -327,7 +325,6 @@ function draw() {
         floor( text('collecting data from users'.toUpperCase(), width/2, height/2))
     }
     if (state == 'prediction'){
-        rectMode(CENTER);
         background(51);
         noFill();
         drawCursor()
