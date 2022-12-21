@@ -1,6 +1,3 @@
-
-
-
 export default {
   
   data() {
@@ -8,11 +5,12 @@ export default {
       title: "🐸 LICK THE TOAD 🐸",
       user_id: "",
       connected_users: 0,
+      oscPort: new osc.WebSocketPort({url: "ws://localhost:8081"}),
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
-      waveform: "",
+      pattSync: "Pattern Play",
+      synth_picked: undefined,
       osc_incoming: "",
-      synth_picked: 'sine',
       droneNotes: 'notes',
       markovState: 'false',
       markov: new Markov('numeric'),
@@ -27,6 +25,20 @@ export default {
     showID()  {
       return this.user_id = socket.id
     },
+     submit(address, port) {
+      this.form.ip = address;
+      this.form.port = port;
+      this.osc_config = {address: this.form.ip, port: this.form.port};
+      console.log('Submitted: ', this.form);
+    },
+    checkPatternIsPlaying() {
+      if(seqIsPlaying == 'false') {
+        this.pattSync = `I can play this pattern: ${this.markov_notes()}`
+        console.log('playing')
+      } else if(seqIsPlaying == 'playing') {
+        this.pattSync = "a pattern is already playing, rejected, try after finishes!";
+      }
+    },
     submit(address, port) {
       this.form.ip = address;
       this.form.port = port;
@@ -37,18 +49,23 @@ export default {
       startAudio();
     },
     osc_out () {
-      if(this.markovState !== 'false'){
-      var osc = Object.fromEntries(Object.entries(this.markov_notes()).map(([key, value]) => [key, value.toFixed(2)]))
-      oscPort.send({
-        address: '/lick',
-        args: [
-          this.user_id,
-          JSON.stringify(osc)
-        ]
-      });
-      this.osc_msg = osc;
-      } else {
-        console.log("train markov", 'first')
+      if(seqIsPlaying == 'false') {
+        this.pattSync = "I can play this pattern and send OSC messages"
+        if(this.markovState !== 'false'){
+          var osc = Object.fromEntries(Object.entries(this.markov_notes()).map(([key, value]) => [key, value.toFixed(2)]));
+          this.oscPort.send({
+            address: '/lick',
+            args: [
+              this.user_id,
+              JSON.stringify(osc)
+            ]
+          })
+          this.osc_msg = osc;
+        } else {
+          console.log("train markov", 'first')
+        }
+      } else if(seqIsPlaying == 'playing') {
+        this.pattSync = "patience another pattern is playing!"
       }
     },
     switch_synth(synth_id) {
@@ -57,10 +74,10 @@ export default {
     },
     markov_notes () {
       if(this.markovState !== 'false') {
-      var notes = this.markov.generateRandom(3);
-      playPattern(notes)
-      this.markov_state = notes.map(n => Tone.Frequency(n, "midi").toNote());
-      return notes
+        var notes = this.markov.generateRandom(6);
+        playPattern(notes)
+        this.markov_state = notes.map(n => Tone.Frequency(n / 10.0, "midi").toNote());
+        return notes
       } else {
         console.log("train markov", "first");
       }
@@ -75,10 +92,14 @@ export default {
       return v
     },
     markov_train() {
-      this.markov.addStates({state: msg.freq, predictions: Object.values(msg)})
-      this.markov.train()
-      this.markovState = 'true';
-      this.markov_state = 'Trained!: ' + JSON.stringify(this.markov.getStates()[0].predictions.map(notes => Tone.Frequency(notes, 'midi').toNote()));
+      this.markov_state = 'waiting new predictions'
+      this.markov.clearChain();
+      setTimeout(() => {
+        this.markov.addStates({state: msg.freq, predictions: [msg.cursor_x, msg.cursor_y]});
+        this.markov.train();
+        this.markovState = 'true'
+        this.markov_state = JSON.stringify(this.markov.getStates())
+      }, "750")
     },
     osc_trigger() {
       setTimeout(() => {
@@ -88,20 +109,21 @@ export default {
     playDrone () {
       console.log(this.markovState)
       if(this.markovState !== 'false'){
-      var notes = this.markov.generateRandom(3);
-      trigDrone(notes)
-      this.droneNotes = notes.map(n => Tone.Frequency(n, "midi").toNote());
+        var notes = this.markov.generateRandom(3);
+        trigDrone(notes)
+        this.droneNotes = notes.map(n => Tone.Frequency(n / 10.0, "midi").toNote());
       } else {
-        console.log("train markov", "first");
+        console.log("train markov", "first")
       }
     }
   },
   created() {
-    this.markov_train()
+    this.oscPort.open();
+    //this.markov_train();
     socket.on('newclientconnect', (data) => {
       this.connected_users = data.guests
     });
-    oscPort.on('message', (oscMsg) => {
+    this.oscPort.on('message', (oscMsg) => {
       if(oscMsg.args == 'osc_trigger') {
         this.osc_trigger();
       } else if (oscMsg.args == 'markov_train') {
@@ -111,6 +133,10 @@ export default {
       }
     });
   },
+ mounted(){
+   this.synth_picked = "Sine"
+   this.switch_synth('sine')
+ },
   updated() {
     this.user_id = socket.id
   }

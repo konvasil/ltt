@@ -5,177 +5,173 @@
   </head>
   <body>
     <title>Licking toad 🐸</title>
-
-    <div id="app">{{ title }} <br></br>
-      Hello: {{user_id}} <br></br>
-      Connected: {{connected_users}} <br></br>
-      Drone notes: {{droneNotes}} <br></br>
-      Markov's state: {{markovState}} {{markov_state}} <br></br>
-      <!--Address: {{ form.ip }} <input type="text" v-model="ip" placeholder="ip" />
-      Port: {{ form.port }} <input type="number" v-model="port" placeholder="port" /> <br></br> -->
-      OSC: {{ osc_msg }} {{osc_incoming}} <br></br>
-
-       <button @click="startAudio()">Start Audio</button>
-      <!--<button @click="submit(ip, port)">Submit</button> -->
-      <button @click="osc_out()">OSC</button>
-      <form @submit.prevent="submit"></form>
-      <button @click="markov_train()">Markov's Train</button>
-      <button @click="markov_notes()">Markov's Notes Play</button>
-      <button @click="playDrone()">Play Drone</button>
-      <div>Voice: {{ synth_picked }}</div>
-      <input type="radio" id="sine" value="Sine" @change="switch_synth('sine')" v-model="synth_picked" />
-      <label for="sine">Sine</label>
-      <input type="radio" id="triangle" value="Triangle" @change="switch_synth('triangle')" v-model="synth_picked" />
-      <label for="triangle">Triangle</label>
-      <input type="radio" id="sawtooth" value="Sawtooth" @change="switch_synth('sawtooth')" v-model="synth_picked" />
-      <label for="sawtooth">Saw</label>
-       <input type="radio" id="square" value="Square" @change="switch_synth('square')" v-model="synth_picked" />
-      <label for="square">Square</label>
-      <div id="sketch-holder">
-      <!-- My P5JS Canvas is here! -->
-    </div>
-    </div>
-
-    <script type="module">
-      import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
-      import Interface from './components/user-interface.js'
-      createApp(Interface).mount('#app')
-    </script>
-
-    <a href="https://periodicos.unespar.edu.br/index.php/vortex/article/view/4695">Info</a>
+    <!--  <a href="https://periodicos.unespar.edu.br/index.php/vortex/article/view/4695">Info</a>
     <br>
-    <a href="https://konvas.netlify.app/">KonVas</a>
-</p>
-<button id="random-url" onclick="randomURL()"> Some Random Info </button>
 
-  <!-- AngularJS Material CSS now available via Google CDN; version 1.2.1 used here -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-  <!-- ml5 -->
-  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
-
-  <!-- p5 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js" integrity="sha512-WJXVjqeINVpi5XXJ2jn0BSCfp0y80IKrYh731gLRnkAS9TKc5KNt/OfLtu+fCueqdWniouJ1ubM+VI/hbo7POQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-  <link rel=“shortcut icon” href=“#”/>
-
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <!--  <script src="/CCapture.all.min.js"></script> -->
-  <script src="https://unpkg.com/tone"></script>
-  <script src="https://unpkg.com/js-markov/dist/markov.js"></script>
+</p> -->
 
 
 
+
+<div id="app">{{ title }} <br></br>
+  Hello: {{user_id}}
+  Connected: {{connected_users}} <br></br>
+  Drone notes: {{droneNotes}} Markov's state: {{markovState}} {{markov_state}} <br></br>
+  <!--Address: {{ form.ip }} <input type="text" v-model="ip" placeholder="ip" />
+      Port: {{ form.port }} <input type="number" v-model="port" placeholder="port" /> <br></br> -->
+  OSC: {{ osc_msg }} {{osc_incoming}} <br></br>
+
+  Msg: {{pattSync}}<br></br>
+  <button @click="startAudio()">Start Audio</button>
+  <button @click="markov_train()">Markov's Train</button>
+  <button @click="checkPatternIsPlaying()">Markov's notes</button>
+  <button @click="playDrone()">Play Drone</button>
+  <!--<button @click="submit(ip, port)">Submit</button>-->
+  <form @submit.prevent="submit"></form>
+  <button @click="osc_out()">OSC Sender</button>
+
+  <br> </br>Voice: {{ synth_picked }} <br></br>
+  <input type="radio" id="sine" value="Sine" @change="switch_synth('sine')" v-model="synth_picked" />
+  <label for="sine">Sine</label>
+  <input type="radio" id="triangle" value="Triangle" @change="switch_synth('triangle')" v-model="synth_picked" />
+  <label for="triangle">Triangle</label>
+  <input type="radio" id="sawtooth" value="Sawtooth" @change="switch_synth('sawtooth')" v-model="synth_picked" />
+  <label for="sawtooth">Saw</label>
+  <input type="radio" id="square" value="Square" @change="switch_synth('square')" v-model="synth_picked" />
+  <label for="square">Square</label> <br></br>
+  <!-- My P5JS Canvas is here! -->
   <input type="text" placeholder="type d on your keyboard to start training" />
-  <!-- <script src="/react-button.js"></script> -->
+  <div id="sketch-holder">
+  </div>
+</div>
 
-  <script src="/socket.io.min.js" type="text/javascript"></script>
+<script type="module">
+  import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+  import Interface from './components/user-interface.js'
+  createApp(Interface).mount('#app')
+</script>
 
-  <!-- FOR deployment -->
+<!-- AngularJS Material CSS now available via Google CDN; version 1.2.1 used here -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js" integrity="sha512-YeeA/Qxn5hYdkukScTCNNOhTrv1C2RubAGButJ1rmgQwZf/HdRaCGl+JAVkqsqaNRaYNHdheiuKKuPf9mDcqKg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdn.jsdelivr.net/npm/osc@2.4.3/dist/osc-browser.min.js" integrity="sha256-e+7BCrzZ6gEVwD6HyqBNokg464MSfp339nTsew0mNCU=" crossorigin="anonymous"></script>
+<!-- ml5 -->
+<script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/osc-browser.min.js" type="text/javascript"></script>
-  <script src="neuralNet.js" type="text/javascript"></script>
-  <script src="sound.js" type="text/javascript"></script>
-  <script src="randomLinkScript.js" type="text/javascript"></script>
+<!-- p5 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js" integrity="sha512-WJXVjqeINVpi5XXJ2jn0BSCfp0y80IKrYh731gLRnkAS9TKc5KNt/OfLtu+fCueqdWniouJ1ubM+VI/hbo7POQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <script type="text/javascript">
-    //https://github.com/colinbdclark/osc.js-examples/blob/master/udp-browser/web/index.html
-    //
+<link rel=“shortcut icon” href=“#”/>
 
-    socket = io()
-    
-    msg = {
-      freq: Math.floor(Math.random() * 220) + 120,
-      cursor_x: Math.floor(Math.random() * 1000),
-      cursor_y: Math.floor(Math.random() * 1000)
-    }
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<!--  <script src="/CCapture.all.min.js"></script> -->
+<script src="https://unpkg.com/tone"></script>
+<script src="https://unpkg.com/js-markov/dist/markov.js"></script>
 
-    var oscPort = new osc.WebSocketPort({
-    url: "ws://localhost:8081", // URL to your Web Socket server.
-    });
 
-    oscPort.open()
-    
-    console.log('ml5 version:', ml5.version);
-    window.addEventListener("beforeunload", function (e) {
-      var confirmationMessage = 'You leaving??'
-      (e || window.event).returnValue = confirmationMessage;
-      return confirmationMessage;
+<!-- <script src="/react-button.js"></script> -->
+
+<script src="/socket.io.min.js" type="text/javascript"></script>
+
+<!-- FOR deployment -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js" integrity="sha512-YeeA/Qxn5hYdkukScTCNNOhTrv1C2RubAGButJ1rmgQwZf/HdRaCGl+JAVkqsqaNRaYNHdheiuKKuPf9mDcqKg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/osc@2.4.3/dist/osc-browser.min.js" integrity="sha256-e+7BCrzZ6gEVwD6HyqBNokg464MSfp339nTsew0mNCU=" crossorigin="anonymous"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/osc-browser.min.js" type="text/javascript"></script>
+<script src="neuralNet.js" type="text/javascript"></script>
+<script src="sound.js" type="text/javascript"></script>
+<script src="randomLinkScript.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+  //https://github.com/colinbdclark/osc.js-examples/blob/master/udp-browser/web/index.html
+  //
+
+  socket = io()
+  
+  msg = {
+    freq: Math.floor(Math.random() * 220) + 120,
+    cursor_x: Math.floor(Math.random() * 1000),
+    cursor_y: Math.floor(Math.random() * 1000)
+  }
+  
+  console.log('ml5 version:', ml5.version);
+  window.addEventListener("beforeunload", function (e) {
+    var confirmationMessage = 'You leaving??'
+    (e || window.event).returnValue = confirmationMessage;
+    return confirmationMessage;
+  })
+
+  $( document ).ready(function() {
+
+    /*$('button').on('click', function() {
+      $('input').focus();
+      });*/
+
+    $('select').on('change', function() {
+      $('input').focus();
     })
+  })
 
-    $( document ).ready(function() {
+  /*var capturer = new CCapture( {
+    format: 'webm',
+    framerate: 60,
+    verbose: true
+    })*/
 
-      /*$('button').on('click', function() {
-        $('input').focus();
-        });*/
+  /* async function keyPressed(){
+     if (key == 'q') {
+     capturer = new CCapture( {
+     verbose: false,
+     display: true,
+     framerate: 30,
+     motionBlurFrames: ( 960 / 30 ),
+     quality: 99,
+     format: 'webm',
+     workersPath: '../../src/',
+     timeLimit: 4,
+     frameLimit: 0,
+     autoSaveTime: 0,
+     onProgress: function( p ) { progress.style.width = ( p * 100 ) + '%' }
+     })
 
-      $('select').on('change', function() {
-        $('input').focus();
-      })
-    })
+     capturer.start();
+     }
 
-    /*var capturer = new CCapture( {
-      format: 'webm',
-      framerate: 60,
-      verbose: true
-      })*/
+     else if (key == 'w') {
+     capturer.stop();
+     capturer.save();
+     }
+     }
 
-    /* async function keyPressed(){
-       if (key == 'q') {
-       capturer = new CCapture( {
-       verbose: false,
-       display: true,
-       framerate: 30,
-       motionBlurFrames: ( 960 / 30 ),
-       quality: 99,
-       format: 'webm',
-       workersPath: '../../src/',
-       timeLimit: 4,
-       frameLimit: 0,
-       autoSaveTime: 0,
-       onProgress: function( p ) { progress.style.width = ( p * 100 ) + '%' }
-       })
+     render()
+  */
 
-       capturer.start();
-       }
+</script>
 
-       else if (key == 'w') {
-       capturer.stop();
-       capturer.save();
-       }
-       }
+<style>
+  #app {
+      font-family: Avenir, Helvetica, Arial, sans-serif, Roboto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 60px;
+  }
 
-       render()
-    */
+  .v-enter-active,
+  .v-leave-active {
+      transition: opacity 2s ease, transform 1s ease-in-out;
+      transform: translateY(0px);
+  }
 
-  </script>
-
-  <style>
-    #app {
-        font-family: Avenir, Helvetica, Arial, sans-serif, Roboto;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-align: center;
-        color: #2c3e50;
-        margin-top: 60px;
-    }
-
-    .v-enter-active,
-    .v-leave-active {
-        transition: opacity 2s ease, transform 1s ease-in-out;
-        transform: translateY(0px);
-    }
-
-    .v-enter-from,
-    .v-leave-to {
-        opacity: 0;
-        transform: translateY(100px);
-    }
-  </style>
-
+  .v-enter-from,
+  .v-leave-to {
+      opacity: 0;
+      transform: translateY(100px);
+  }
+</style>
+<button id="random-url" onclick="randomURL()"> Some Random Info </button> <br> </br>
+<a href="https://konvas.netlify.app/">konvas.netlify.app</a>
 </body>
 </html>

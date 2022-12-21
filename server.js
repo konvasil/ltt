@@ -53,45 +53,12 @@ udpPort.open()
 
 udpPort.on("ready", function (oscMsg, timeTag, info) {
     var ipAddresses = getIPAddresses();
-    console.log("Listening for OSC over UDP.");
+    console.log("Listening for OSC over UDP.", udpPort.options.localPort);
 
     ipAddresses.forEach(function (address) {
         console.log(" Host:", address + ", Port:", udpPort.options.localPort)
     })
 
-});
-
-/*udpPort.on("ready", function () {
-  udpPort.send({
-  address: "/s_new",
-  args: [
-  {
-  type: "s",
-  value: "default"
-  },
-  {
-  type: "i",
-  value: 100
-  }
-  ]
-  }, "127.0.0.1", 57120);
-  });*/
-
-const wss = new WebSocket.Server({
-    port:8081
-})
-
-wss.on("connection", function (socket) {
-    // console.log("A Web Socket connection has been established!");
-    var socketPort = new osc.WebSocketPort({
-        socket: socket
-    });
-    /*relaying from socketport to udp,
-      server hits back OSC from SC to browser
-      [Browser(WBsocks) <--> UDP <--> SC]*/
-    var relay = new osc.Relay(udpPort, socketPort, {
-        raw: true
-    });
 });
 
 udpPort.on("message", function (oscMessage) {
@@ -100,6 +67,32 @@ udpPort.on("message", function (oscMessage) {
 
 udpPort.on("error", function (err) {
     console.log(err);
+});
+
+const wss = new WebSocket.Server({
+    port:8081
+})
+
+//Listen for Web Socket connections
+wss.on("connection", function (socket) {
+
+    console.log("A Web Socket connection has been established!");
+
+    var socketPort = new osc.WebSocketPort({
+        socket: socket
+    });
+
+    socketPort.on("message", function (oscMessage) {
+        console.log(oscMessage);
+    });
+
+    socketPort.on("error", function (err) {
+        console.log(err);
+    });
+
+    var relay = new osc.Relay(udpPort, socketPort, {
+        raw: true
+    });
 });
 
 /*const io = require("socket.io")(server, {
@@ -155,10 +148,6 @@ app.get('/index.html', function(req, res) {
 
 app.get('user-interface.js', function(req, res) {
     res.sendFile(__dirname + '/public/main/components/');
-})
-
-udpPort.on("message", (oscMsg) => {
-    console.log("An OSC message just arrived!", oscMsg.args);
 })
 
 function heartbeat() {

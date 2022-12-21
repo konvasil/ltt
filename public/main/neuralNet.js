@@ -28,9 +28,9 @@ const trainingOptions = {
 } 
 
 function setup(){
-    var canvas = createCanvas(windowWidth/2, windowHeight/2)
-    canvas.parent('sketch-holder')
-   
+    var canvas = createCanvas(windowWidth/1.5, windowHeight/3)
+    canvas.parent('sketch-holder');
+
     t = 0
     tempo = 120
 
@@ -133,9 +133,7 @@ async function keyPressed(){
 
     //load data from GitHub
     if(key == 'f' && state == 'waiting') {
-        fetch('https://raw.githubusercontent.com/KonVas/lick-the-toad/main/public/main/data.json', {
-            mode: 'no-cors',
-            credentials: 'same-origin'
+       fetch('https://raw.githubusercontent.com/KonVas/lick-the-toad/main/public/main/data.json', {
         })
             .then(response => {
                 if (!response.ok) {
@@ -145,7 +143,7 @@ async function keyPressed(){
             })
             .then(data => {
                 console.log(data)
-                //brain.loadData(data, dataLoaded)
+                brain.loadData(data, dataLoaded)
             })
             .catch(error => console.log(error))
     }
@@ -213,7 +211,7 @@ function drawCursor() {
         }
         fill(255)
         stroke(255, 18)
-        text("Data: " + msg.freq.toFixed(2) + JSON.stringify(cursor), cursor.x, cursor.y)
+        text(JSON.stringify(Object.values(msg)), cursor.x, cursor.y);
         line(cursor.x, 0, cursor.x, height)
         line(0, cursor.y, width, cursor.y)
 
@@ -227,7 +225,7 @@ function drawCursor() {
 
         fill(255)
         stroke(255, 18)
-        text("Freq Out: " + msg.freq, cursor.x, cursor.y)
+        text(msg.freq + "\n" + JSON.stringify(cursor.x) + "\n" + JSON.stringify(cursor.y), cursor.x+10, cursor.y-35)
         line(cursor.x, 0.0, cursor.x, height)
         line(0.0, cursor.y, width, cursor.y)
     }
