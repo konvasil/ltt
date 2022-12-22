@@ -6,16 +6,16 @@
   <body>
     <title>Licking toad 🐸</title>
     <!--  <a href="https://periodicos.unespar.edu.br/index.php/vortex/article/view/4695">Info</a>
-    <br>
+          <br>
 
 </p> -->
 
 
 
 
-<div id="app">{{ title }} <br></br>
+<div id="app1">{{ title }} <br></br>
   Hello: {{user_id}}
-  Connected: {{connected_users}} <br></br>
+  Users: {{connected_users}} Tempo: {{tempo}} <br></br>
   Drone notes: {{droneNotes}} Markov's state: {{markovState}} {{markov_state}} <br></br>
   <!--Address: {{ form.ip }} <input type="text" v-model="ip" placeholder="ip" />
       Port: {{ form.port }} <input type="number" v-model="port" placeholder="port" /> <br></br> -->
@@ -28,8 +28,21 @@
   <button @click="playDrone()">Play Drone</button>
   <!--<button @click="submit(ip, port)">Submit</button>-->
   <form @submit.prevent="submit"></form>
-  <button @click="osc_out()">OSC Sender</button>
+  <button @click="osc_trigger()">OSC Send</button>
 
+  <button class="btn-primary" v-on:click="isHidden = !isHidden">
+  {{ isHidden ? 'Click to Show Instruction' : 'Click to Hide Instructions' }}
+</button>
+
+  <div v-if="!isHidden"><a>
+      Press "d" on your keyboard to start training the neural network, now wait for the system to complete the training process. <br>
+      Create sound: press 'Markov Train' and see the predictions. <br>
+      Play the notes by pressing either: <br>
+        Single notes: “Play Drone”. <br>
+          Or a sequence of notes: "Markov's notes". <br>
+      Best uses Press modern web browsers on iPhone iOS and Android and other mobile devices (iPad and laptop computers and typewriters for the best experience. <br>
+      Mind device's volume and use AYOR...
+  </a></div>
   <br> </br>Voice: {{ synth_picked }} <br></br>
   <input type="radio" id="sine" value="Sine" @change="switch_synth('sine')" v-model="synth_picked" />
   <label for="sine">Sine</label>
@@ -46,9 +59,9 @@
 </div>
 
 <script type="module">
-  import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+  import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js";
   import Interface from './components/user-interface.js'
-  createApp(Interface).mount('#app')
+  createApp(Interface).mount('#app1')
 </script>
 
 <!-- AngularJS Material CSS now available via Google CDN; version 1.2.1 used here -->
@@ -150,7 +163,7 @@
 </script>
 
 <style>
-  #app {
+  #app1 {
       font-family: Avenir, Helvetica, Arial, sans-serif, Roboto;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -171,6 +184,8 @@
       transform: translateY(100px);
   }
 </style>
+
+
 <button id="random-url" onclick="randomURL()"> Some Random Info </button> <br> </br>
 <a href="https://konvas.netlify.app/">konvas.netlify.app</a>
 </body>

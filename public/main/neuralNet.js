@@ -43,20 +43,6 @@ function setup(){
     }
 
     brain = ml5.neuralNetwork(options)
-    //brain.load(modelInfo, modelLoaded)
-    //Host IP address
-
-    //socket = io()
-
-    let OlderUsers = 0;
-    socket.on('newclientconnect', (users) => {
-        tempo = users.guests
-        if(users.guests !== NaN){
-            console.log(users.description, users.guests)
-            //Tone.Transport.bpm.value = users.guests * (2 * 60)
-            tempoChange(users.guests * (2*25))
-        }
-    })
 
     //receive input data from ball clients
     socket.on('heartbeat', (data) => {

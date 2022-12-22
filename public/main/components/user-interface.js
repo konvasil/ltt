@@ -4,15 +4,18 @@ export default {
     return {
       title: "🐸 LICK THE TOAD 🐸",
       user_id: "",
-      connected_users: 0,
+      connected_users: undefined,
+      tempo: undefined,
       oscPort: new osc.WebSocketPort({url: "ws://localhost:8081"}),
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
       pattSync: "Pattern Play",
       synth_picked: undefined,
+      disclaimer: "Best uses: modern web browsers on iPhone iOS and Android and typewriters for the best experience, mind device’s volume and use AYOR",
       osc_incoming: "",
       droneNotes: 'notes',
       markovState: 'false',
+      isHidden: true,
       markov: new Markov('numeric'),
       markov_state: 'untrained',
       form: {
@@ -25,7 +28,7 @@ export default {
     showID()  {
       return this.user_id = socket.id
     },
-     submit(address, port) {
+    submit(address, port) {
       this.form.ip = address;
       this.form.port = port;
       this.osc_config = {address: this.form.ip, port: this.form.port};
@@ -115,14 +118,24 @@ export default {
       } else {
         console.log("train markov", "first")
       }
+    },
+    setTempo(tempo) {
+      var limitTempo = limitNumberWithinRange(tempo)
+      Tone.Transport.bpm.rampTo(limitTempo, 0.1)
+      this.tempo = limitTempo //80min - 200max
     }
   },
   created() {
     this.oscPort.open();
     //this.markov_train();
+
     socket.on('newclientconnect', (data) => {
+      if(data.guests !== NaN){
       this.connected_users = data.guests
+        this.setTempo(Tone.Transport.bpm.value + data.guests)
+      }
     });
+
     this.oscPort.on('message', (oscMsg) => {
       if(oscMsg.args == 'osc_trigger') {
         this.osc_trigger();
@@ -133,10 +146,10 @@ export default {
       }
     });
   },
- mounted(){
-   this.synth_picked = "Sine"
-   this.switch_synth('sine')
- },
+  mounted(){
+    this.synth_picked = "Sine"
+    this.switch_synth('sine')
+  },
   updated() {
     this.user_id = socket.id
   }

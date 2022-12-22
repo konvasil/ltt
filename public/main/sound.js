@@ -1,5 +1,6 @@
-const rverb = new Tone.Reverb(0.1).toDestination();
+const rverb = new Tone.Reverb(0.25).toDestination();
 const fb = new Tone.FeedbackCombFilter(0.1, 0.6).toDestination();
+Tone.Transport.bpm.value = 80;
 
 var shift = new Tone.PitchShift(-12).toDestination()
 shift.numberOfOutputs = 2;
@@ -12,7 +13,7 @@ lfo.connect(shift.feedback);
 
 lfo.start();
 
-Volume = new Tone.Volume(-1)
+Volume = new Tone.Volume(0)
 synth = new Tone.PolySynth(Tone.Synth).chain(Volume, rverb, shift, fb,  Tone.Destination);
 
 synth.set({
@@ -27,7 +28,7 @@ startAudio = function(){
 }
 
 var trigDrone = function (notes) {
-  notes = Object.values(notes).map(p => Tone.Frequency(p*10).toMidi())
+  notes = Object.values(notes).map(p => Tone.Frequency(p, "midi").toMidi())
   if(Tone.Transport.state == 'started')
   {
     console.log("a pattern is playing", "wait");
@@ -36,9 +37,11 @@ var trigDrone = function (notes) {
   }
 }
 
-tempoChange = function(tempo){
-  Tone.Transport.bpm.value = tempo
-    //Math.floor(Math.random() * (120 - 4 + 1) + 60)
+function limitNumberWithinRange(num, tempoMin, tempoMax){
+  const MIN = tempoMin || 80
+  const MAX = tempoMax || 200
+  const parsed = parseInt(num)
+  return Math.min(Math.max(parsed, MIN), MAX)
 }
 
 let seqIsPlaying = 'false'
