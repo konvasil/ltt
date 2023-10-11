@@ -1,24 +1,21 @@
-const rverb = new Tone.Reverb(0.25).toDestination();
-const fb = new Tone.FeedbackCombFilter(0.1, 0.6).toDestination();
-Tone.Transport.bpm.value = 80;
-
-var shift = new Tone.PitchShift(-12).toDestination()
-shift.numberOfOutputs = 2;
+const rverb = new Tone.Reverb(0.1).toDestination();
+const pan = new Tone.AutoPanner().toDestination();
+Tone.Transport.bpm.value = 40;
+var shift = new Tone.PitchShift(12).toDestination();
+var filter = new Tone.Filter(200, "highpass");
+shift.feedback = 0.5;
 
 var lfo = new Tone.LFO();
-
-lfo.connect(fb.delayTime);
-lfo.connect(shift.delayTime);
-lfo.connect(shift.feedback);
 
 lfo.start();
 
 Volume = new Tone.Volume(0)
-synth = new Tone.PolySynth(Tone.Synth).chain(Volume, rverb, shift, fb,  Tone.Destination);
+synth = new Tone.PolySynth(Tone.MonoSynth).chain(Volume, rverb, shift, filter, pan, Tone.Destination);
 
 synth.set({
   envelope: {
-    attack: 0.25
+    attack: 0.05,
+    release: 3.0
   }
 })
 
@@ -59,7 +56,7 @@ function playPattern (notes) {
   seqIsPlaying = 'playing'
 
   const seq = new Tone.Sequence((time, note) => {
-    synth.triggerAttackRelease(note, 0.3, time)
+    synth.triggerAttackRelease(note, 2.8, time)
 
     count = count + 1;
 
