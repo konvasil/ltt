@@ -1,6 +1,7 @@
 let state = 'waiting', predictionMode = 'automatic', xoff = 0.0, speedCursor = 0.01, speedSlider, modelInfo, socket, brain, cursor = {}, button, inputs = [], trainData = [], t = 0, noiseScale = 0.02, noiseVal = 0.0;
 let angle = 0.0;
 let jitter = 0.0;
+let prediction = 100.0;
 
 msg = {
   freq: Math.floor(Math.random() * 220) + 120,
@@ -19,18 +20,20 @@ let freqs = {
 
 const options = {
     task: 'regression',
-    debug: true
+    debug: false,
+    outputs: [4],
+    learningRate: 0.2,
+    hiddenUnits: 16,
 }
 
 const trainingOptions = {
     epochs: 10,
-    batchSize: 12
+    batchSize: 24,
 } 
 
 function setup(){
     var canvas = createCanvas(windowWidth/1.5, windowHeight/3)
     canvas.parent('sketch-holder');
-
     t = 0
     tempo = 120
 
@@ -197,7 +200,7 @@ function drawCursor() {
         }
         fill(255)
         stroke(255, 18)
-        text(JSON.stringify(Object.values(msg)), cursor.x, cursor.y);
+        text(JSON.stringify(prediction.label +":"+ prediction.freq), cursor.x, cursor.y);
         line(cursor.x, 0, cursor.x, height)
         line(0, cursor.y, width, cursor.y)
 
@@ -211,7 +214,7 @@ function drawCursor() {
 
         fill(255)
         stroke(255, 18)
-        text(msg.freq + "\n" + JSON.stringify(cursor.x) + "\n" + JSON.stringify(cursor.y), cursor.x+10, cursor.y-35)
+        text(prediction.freq) // + "\n" + JSON.stringify(cursor.x) + "\n" + JSON.stringify(cursor.y), cursor.x+10, cursor.y-35)
         line(cursor.x, 0.0, cursor.x, height)
         line(0.0, cursor.y, width, cursor.y)
     }
@@ -329,13 +332,10 @@ function handleResults(error, result) {
         return
     }
 
-    msg = {
-        freq: result[0].freq,
-        cursor_x: cursor.x,
-        cursor_y: cursor.y
-    }
+    prediction = result[0]
 
-    //console.log(msg)
+
+    //console.log(result[0])
 
     //oscFwd(msg)
 

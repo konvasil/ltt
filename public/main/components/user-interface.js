@@ -2,7 +2,7 @@ export default {
   
   data() {
     return {
-      title: "🐸 LICK THE TOAD 🐸",
+      title: "LICK THE TOAD",
       user_id: "",
       connected_users: undefined,
       tempo: undefined,
@@ -48,27 +48,30 @@ export default {
       this.osc_config = {address: this.form.ip, port: this.form.port};
       console.log('Submitted: ', this.form);
     },
-    startAudio() {
-      startAudio();
-    },
     osc_out () {
       if(seqIsPlaying == 'false') {
-        this.pattSync = "I can play this pattern and send OSC messages"
-        if(this.markovState !== 'false'){
-          var osc = Object.fromEntries(Object.entries(this.markov_notes()).map(([key, value]) => [key, value.toFixed(2)]));
+        this.pattSync = "Pattern is playing and OSC sent."
+        if(this.markovState !== 'false') {
+          var oscNotes = Object.fromEntries(Object.entries(this.markov_notes()).map(([key, value]) => [key, value.toFixed(2)]));
           this.oscPort.send({
             address: '/lick',
             args: [
-              this.user_id,
-              JSON.stringify(osc)
+              {
+                type: "s",
+                value: this.user_id
+              },
+              {
+                type: "s",
+                value: JSON.stringify(oscNotes, null, 4)
+              }
             ]
-          })
-          this.osc_msg = osc;
+          });
+          this.osc_msg = Object.values(oscNotes)
         } else {
           console.log("train markov", 'first')
         }
       } else if(seqIsPlaying == 'playing') {
-        this.pattSync = "patience another pattern is playing!"
+        this.pattSync = "patience, another pattern is playing!"
       }
     },
     switch_synth(synth_id) {
@@ -77,7 +80,7 @@ export default {
     },
     markov_notes () {
       if(this.markovState !== 'false') {
-        var notes = this.markov.generateRandom(6);
+        var notes = this.markov.generateRandom(8);
         playPattern(notes)
         this.markov_state = notes.map(n => Tone.Frequency(n / 10.0, "midi").toNote());
         return notes
@@ -97,12 +100,16 @@ export default {
     markov_train() {
       this.markov_state = 'waiting new predictions'
       this.markov.clearChain();
+      if(Number(prediction.freq) !== NaN){
       setTimeout(() => {
-        this.markov.addStates({state: msg.freq, predictions: [msg.cursor_x, msg.cursor_y]});
+        this.markov.addStates({state: prediction.freq, predictions: [prediction.unNormalizedValue * 1000.00, prediction.value / 2]});
         this.markov.train();
         this.markovState = 'true'
         this.markov_state = JSON.stringify(this.markov.getStates())
       }, "750")
+      } else {
+        this.osc_msg = "First Train";
+      }
     },
     osc_trigger() {
       setTimeout(() => {
@@ -112,7 +119,7 @@ export default {
     playDrone () {
       console.log(this.markovState)
       if(this.markovState !== 'false'){
-        var notes = this.markov.generateRandom(3);
+        var notes = this.markov.generateRandom(2);
         trigDrone(notes)
         this.droneNotes = notes.map(n => Tone.Frequency(n / 10.0, "midi").toNote());
       } else {

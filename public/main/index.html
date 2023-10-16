@@ -12,7 +12,6 @@
 
 
 
-
 <div id="app1">{{ title }} <br></br>
   Hello: {{user_id}}
   Users: {{connected_users}} Tempo: {{tempo}} <br></br>
@@ -22,9 +21,8 @@
   OSC: {{ osc_msg }} {{osc_incoming}} <br></br>
 
   Msg: {{pattSync}}<br></br>
-  <button @click="startAudio()">Start Audio</button>
   <button @click="markov_train()">Markov's Train</button>
-  <button @click="checkPatternIsPlaying()">Markov's notes</button>
+  <!-- <button @click="checkPatternIsPlaying()">Markov's notes</button> -->
   <button @click="playDrone()">Play Drone</button>
   <!--<button @click="submit(ip, port)">Submit</button>-->
   <form @submit.prevent="submit"></form>
@@ -107,7 +105,7 @@
     cursor_x: Math.floor(Math.random() * 1000),
     cursor_y: Math.floor(Math.random() * 1000)
   }
-  
+
   console.log('ml5 version:', ml5.version);
   window.addEventListener("beforeunload", function (e) {
     var confirmationMessage = 'You leaving??'
@@ -125,40 +123,18 @@
       $('input').focus();
     })
   })
+  
+window.addEventListener('keydown', startAudio)
+window.addEventListener('click', startAudio)
+window.addEventListener('touchstart', startAudio)
 
-  /*var capturer = new CCapture( {
-    format: 'webm',
-    framerate: 60,
-    verbose: true
-    })*/
-
-  /* async function keyPressed(){
-     if (key == 'q') {
-     capturer = new CCapture( {
-     verbose: false,
-     display: true,
-     framerate: 30,
-     motionBlurFrames: ( 960 / 30 ),
-     quality: 99,
-     format: 'webm',
-     workersPath: '../../src/',
-     timeLimit: 4,
-     frameLimit: 0,
-     autoSaveTime: 0,
-     onProgress: function( p ) { progress.style.width = ( p * 100 ) + '%' }
-     })
-
-     capturer.start();
-     }
-
-     else if (key == 'w') {
-     capturer.stop();
-     capturer.save();
-     }
-     }
-
-     render()
-  */
+async function startAudio() {
+    await Tone.start()    
+    console.log('started audio')
+    window.removeEventListener('keydown', startAudio)
+    window.removeEventListener('click', startAudio)
+    window.removeEventListener('touchstart', startAudio)
+}
 
 </script>
 
