@@ -1,0 +1,114 @@
+                        ━━━━━━━━━━━━━━━━━━━━━━━━
+                         INTELIGENT BEHEAMOTHS
+
+                         Konstantinos Vasilakos
+                        ━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+                               2023-10-19
+
+
+Table of Contents
+─────────────────
+
+1. Overview
+2. IO interface Training
+3. Sound
+4. The interface
+5. Modes of Interaction
+6. Live Coding Method
+7. Examples
+8. Reflections
+9. Epilogue
+.. 1. Technical Details
+
+
+DESCRIPTION:
+
+
+1 Overview
+══════════
+
+                    <file:./screens/ltt-interface.png>
+
+
+2 IO interface Training
+═══════════════════════
+
+  #            + ATTR_LaTeX: :height 0.9\textwidth :center
+                 <file:./screens/client-io-interface.png>
+
+
+3 Sound
+═══════
+
+  The live coding performance is focussing on the real time sonification
+  of the incoming data, in SuperCollider.
+
+
+4 The interface
+═══════════════
+
+  Each user is represented in a selection window which brings up an
+  event.In addition to the textual feedback window there is also a
+  slider group showing each user’s event.
+
+
+5 Modes of Interaction
+══════════════════════
+
+                      <file:./screens/sc-pop-up.png>
+                     <file:./screens/sc-sliders.png>
+
+  Capturing patterns that provide the events of users in the form of OSC
+  data which can be manipulated further for live coding with
+  SuperCollider.
+
+
+6 Live Coding Method
+════════════════════
+
+  Live Coding takes place in SuperCollider, using patterns to map the
+  incoming OSC to custom made synthesisers which can be changed in real
+  time.
+
+
+7 Examples
+══════════
+
+  ⁃ $Prand$
+  ⁃ $Pseq$
+  ⁃ $Pser$
+  ⁃ $Pxrand$
+    • …etc.
+
+
+8 Reflections
+═════════════
+
+  The project aims to serve as a visual map which delineates the actions
+  of the members of an audience trying to make sense of an uncharted
+  territory with limited spatial movements.
+
+
+9 Epilogue
+══════════
+
+  Such causes however are not flaws but main features of the craft of
+  electroacoustic music.
+
+
+9.1 Technical Details
+─────────────────────
+
+  • Project is a client/server system
+    • Training interface and Predictions.
+  • The project is developed in JavaScript.
+  • Communication client/server is bound through WebSockets.
+  • Server is made using Express.
+  • Data from clients is sent through OSC protocol.
+  • It is hosted locally with NodeJS computer and online ->
+    <https://lick-the-toad.netlify.app/>
+  • Connection with users and OSC is supported only locally now.
+  • Sound synthesis of clients is using Tone.js and Markov chains
+    extension for JS.

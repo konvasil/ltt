@@ -29,6 +29,9 @@ The live coding performance is focussing on the real time sonification of the in
 Each user is transmitting the information of their sound synthesis in SuperCollider.
 The coder is mapping this values in running processes with the help of streams and patterns
 of SuperCollider.
+** The Interface
+SuperCollider's part of the system supports selection of each event through the user's ID in a GUI.
+./images/
 ** Live Coding Method
 Patterns, are random or sequential, which may control any sound parameter of a synthesiser.
 Examples, Prand, Pseq, Pser, Pxrand etc. The input data can also be used as single values.

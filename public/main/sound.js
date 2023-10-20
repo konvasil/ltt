@@ -37,9 +37,10 @@ function limitNumberWithinRange(num, tempoMin, tempoMax){
 let seqIsPlaying = 'false'
 
 function playPattern (notes) {
-  //notes = notes.map(ns => limitNumberWithinRange(ns, 120.0, 1220.0)); //min - max vals
-  let midi_list = notes.map(notes => Math.abs(Tone.Frequency(notes, "midi").toMidi() ));
+  notes = notes.map(notes => Math.abs(notes / 127 * 17.32)); //MIDI range vals
+  let midi_list = notes.map((n) => Tone.Frequency(n, "midi").toNote() ) //Notes.map(notes => Math.abs(Tone.Frequency(notes, "midi").toMidi() ));
   let last_note = midi_list.length;
+  console.log(`midi: ${midi_list}`)
 
   count = 0;
 

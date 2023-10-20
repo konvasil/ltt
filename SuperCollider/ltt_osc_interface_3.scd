@@ -7,8 +7,11 @@ var menu, button, snd, events;
 ~dict = ();
 ~date = Date.getDate;
 Pdef(\licks, Pbind(\dur, 0.25));
-~lick = NodeProxy.audio(s, 2);
-~updateSliders = [0, 1, 2, 3, 4, 5, 6, 7];
+~lick = NodeProxy(s).play;
+~lick.fadeTime = 2;
+~funcDict = IdentityDictionary();
+~keyIndex = [0, 1, 2, 3, 4, 5, 6, 7];
+
 OSCdef(\lickin, {|...args|
 	var userID = args[0][1].asString.asSymbol;
 	var keys_2_symbols = {|v, i| (i % 2 == 0).if(v.asSymbol, v)};
@@ -23,7 +26,8 @@ OSCdef(\lickin, {|...args|
 		}.defer;
 		oscArray.keysValuesDo({|index, value|
 			{
-				\notifier.changed(~updateSliders[index.interpretVal], userID, value.interpretVal, ~date.localtime);
+				[index, userID, value].postln;
+				\notifier.changed(~keyIndex[index.interpretVal], userID, value, ~date.localtime);
 			}.defer;
 			});
 	}
@@ -41,20 +45,21 @@ OSCdef(\lickin, {|...args|
 })
 .action_({|butt, mod|
 	~funcDict[\pattern].value(menu.item, snd);
-
 });
 
 ~sliderWindow = Window("LTT Streams")
 .front.view.layout = HLayout(
 	* ( ~sliders = {Slider() } !8) );
 
-~funcDict = IdentityDictionary();
+Spec.add(\degree, [1.0, 10.0]);
 
 ~funcDict[\pattern] = {|id, data|
-	var def, pat = data.values.asArray.collect({|val| val.interpretVal.max(80) });
+	var def, pat = data.values.asArray.collect({|val| (val.asInteger.cpsmidi.round(0.1) / 10.0).abs });
 	~def = Pbindef(\licks, \freq, Pseq(pat, inf));
-	~lick.source = Pdef(id.asSymbol, Pbind(\freq, Pseq(pat.asInteger, inf), \legato, 0.2, \stretch, 1, \sustain, 0.5));
-	~text.setString("\n" + ~lick.source.asCode.asString + "\n");
+	~midi = ((0..7)).collect({|i, item| (~sliders[item].value.midicps) });
+	p = Pbind(\degree, Pseq(pat, inf));
+	~lick[0] = Pdef(id.asSymbol);
+	~text.setString("\n" + p.asCode + "\n");
 };
 
 ~selectWindow.onClose_({
@@ -63,15 +68,18 @@ OSCdef(\lickin, {|...args|
 	Pdef.clear;
 	OSCdef(\lickin).free;
 	~funcDict.clear;
+	~lick.clear;
 	[\listener, \notifier].do({_.objectClosed});
 });
 
-~updateSliders.collect({|index|
-	\listener.addNotifier(\notifier, index, {|key, val, notifier, time|
-	var usr = "/%".format(key);
-	~sliders[index].value = val / 1000.0;
-		}); index});
-
+~keyIndex.collect({|index|
+	\listener.addNotifier(\notifier, index, {|user_id, val, notifier, time|
+	//var usr = "/%".format(key);
+	~sliders[index].value = val.interpretVal / 1000.0;
+		~sliderWindow.name = "User " + user_id;
+	});
+	index
+});
 )
 
 

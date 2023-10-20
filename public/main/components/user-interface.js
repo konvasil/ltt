@@ -2,7 +2,7 @@ export default {
   
   data() {
     return {
-      title: "LICK THE TOAD",
+      title: "lick the toad",
       user_id: "",
       connected_users: undefined,
       tempo: undefined,
@@ -80,10 +80,22 @@ export default {
     },
     markov_notes () {
       if(this.markovState !== 'false') {
-        var notes = this.markov.generateRandom(8);
-        playPattern(notes)
-        this.markov_state = notes.map(n => Tone.Frequency(n / 10.0, "midi").toNote());
-        return notes
+        var markov_notes = this.markov.generateRandom(8);
+        let filterNotes = new Array();
+
+        markov_notes.filter(function(note) {
+          if(note > 100.0) {
+            filterNotes.push(note)
+          } else {
+            console.log(`Value exceeds range: ${note}`)
+            console.log(`Added:, ${note = note + 100}`)
+            filterNotes.push(note)
+          }});
+
+        playPattern(filterNotes);
+        console.log(filterNotes);
+        this.markov_state = filterNotes.map(n => Tone.Frequency(n / 10.0, "midi").toNote());
+        return filterNotes
       } else {
         console.log("train markov", "first");
       }
