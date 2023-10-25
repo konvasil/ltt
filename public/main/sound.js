@@ -1,10 +1,13 @@
-Tone.Transport.bpm.value = 10;
-const rverb = new Tone.JCReverb(0.1).toDestination();
-var shift = new Tone.PitchShift(12).toDestination();
-var filter = new Tone.Filter(200, "highpass");
-shift.feedback = 0.1;
 
-Volume = new Tone.Volume(-24)
+Tone.Transport.bpm.value = 120;
+
+const rverb = new Tone.JCReverb(0.75).toDestination();
+var filter = new Tone.Filter(120, "highpass").toDestination();
+
+Volume = new Tone.Volume(-12);
+
+const panner = new Tone.Panner(1).toDestination();
+panner.pan.rampTo(-1, 0.5);
 
 /*var ampEnv = new Tone.AmplitudeEnvelope({
 	"attack": 0.3,
@@ -13,7 +16,16 @@ Volume = new Tone.Volume(-24)
 	"release": 0.25
 }).toMaster();*/
 
-synth = new Tone.PolySynth(Tone.AMSynth).chain(Volume, shift, filter, rverb, Tone.Destination);
+
+synth = new Tone.PolySynth(Tone.FMSynth).toDestination();
+synth.chain(Volume, rverb, filter, Tone.Master);
+synth.connect(panner);
+synth.polyphony = 8;
+synth.set({
+	"envelope" : {
+		"attack" : 0.1
+	}
+});
 
 var trigDrone = function (notes) {
   notes = Object.values(notes).map(p => Tone.Frequency(p, "midi").toMidi())
@@ -21,7 +33,8 @@ var trigDrone = function (notes) {
   {
     console.log("a pattern is playing", "wait");
   } else {
-    synth.triggerAttackRelease(notes, 3);
+    synth.triggerAttackRelease(notes, 8)
+    synth.volume.value -24
    // ampEnv.triggerAttackRelease("8t");
 
   }
@@ -40,17 +53,15 @@ function playPattern (notes) {
   notes = notes.map(notes => Math.abs(notes / 127 * 17.32)); //MIDI range vals
   let midi_list = notes.map((n) => Tone.Frequency(n, "midi").toNote() ) //Notes.map(notes => Math.abs(Tone.Frequency(notes, "midi").toMidi() ));
   let last_note = midi_list.length;
-  console.log(`midi: ${midi_list}`)
+  console.log(`midi: ${midi_list}`);
 
   count = 0;
 
   seqIsPlaying = 'playing'
 
   const seq = new Tone.Sequence((time, note) => {
-    const now = Tone.now()
-    synth.triggerAttackRelease(note, "2n", now + 1.0);
+    synth.triggerAttackRelease(note, "18n", Tone.now());
     console.log(note);
-    //ampEnv.triggerAttackRelease("8t");
     count = count + 1;
     if (count === last_note) {
       seq.stop();
@@ -61,4 +72,8 @@ function playPattern (notes) {
   }, midi_list).start(0)
 
   Tone.Transport.start()
+
+  return midi_list
+
+
 }

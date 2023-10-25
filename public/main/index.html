@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="index.css">
+    <!-- PrismJS: Syntax Highlighting -->
+    <link rel="stylesheet" href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css">
   </head>
   <body>
     <title>Licking toad 🐸</title>
@@ -11,8 +12,8 @@
 </p> -->
 
 
-
 <div id="app1">{{ title }} <br></br>
+
   User ID: {{user_id}}
   Users: {{connected_users}} Tempo: {{tempo}} <br></br>
   Drone notes: {{droneNotes}} Markov's state: {{markovState}} {{markov_state}} <br></br>
@@ -21,23 +22,24 @@
   OSC: {{ osc_msg }} {{osc_incoming}} <br></br>
 
   Msg: {{pattSync}}<br></br>
-  <button @click="markov_train()">Markov's Train</button>
-  <!-- <button @click="checkPatternIsPlaying()">Markov's notes</button> -->
-  <button @click="playDrone()">Play Drone</button>
+  Volume: {{vol}} <br></br>
+  <button class="button-info" @click="markov_train()">MARKOV STATES</button>
+  <button @click="checkPatternIsPlaying()">Markov's notes</button>
+  <button class="button-danger" @click="playDrone()">Play Drone</button>
   <!--<button @click="submit(ip, port)">Submit</button>-->
   <form @submit.prevent="submit"></form>
-  <button @click="osc_trigger()">OSC Send</button>
+  <button class="button-success" @click="osc_trigger()">OSC Send</button>
 
   <button class="btn-primary" v-on:click="isHidden = !isHidden">
-  {{ isHidden ? 'Click to Show Instruction' : 'Click to Hide Instructions' }}
-</button>
+    {{ isHidden ? 'Click to Show Instruction' : 'Click to Hide Instructions' }}
+  </button>
 
   <div v-if="!isHidden"><a>
       Press "d" on your keyboard to start training the neural network, now wait for the system to complete the training process. <br>
       Create sound: press 'Markov Train' and see the predictions. <br>
       Play the notes by pressing either: <br>
-        Single notes: “Play Drone”. <br>
-          Or a sequence of notes: "Markov's notes". <br>
+      Single notes: “Play Drone”. <br>
+      Or a sequence of notes: "Markov's notes". <br>
       Best uses Press modern web browsers on iPhone iOS and Android and other mobile devices (iPad and laptop computers and typewriters for the best experience. <br>
       Mind device's volume and use AYOR...
   </a></div>
@@ -50,6 +52,7 @@
   <label for="sawtooth">Saw</label>
   <input type="radio" id="square" value="Square" @change="switch_synth('square')" v-model="synth_picked" />
   <label for="square">Square</label> <br></br>
+  <input type="range" min="0" max="1.0" value="0.5" @change="set_volume(vol)" class="slider" id="vol" v-model="vol" step="0.01" />
   <!-- My P5JS Canvas is here! -->
   <input type="text" placeholder="type d on your keyboard to start training" />
   <div id="sketch-holder">
@@ -124,17 +127,17 @@
     })
   })
   
-window.addEventListener('keydown', startAudio)
-window.addEventListener('click', startAudio)
-window.addEventListener('touchstart', startAudio)
+  window.addEventListener('keydown', startAudio)
+  window.addEventListener('click', startAudio)
+  window.addEventListener('touchstart', startAudio)
 
-async function startAudio() {
+  async function startAudio() {
     await Tone.start()    
     console.log('started audio')
     window.removeEventListener('keydown', startAudio)
     window.removeEventListener('click', startAudio)
     window.removeEventListener('touchstart', startAudio)
-}
+  }
 
 </script>
 

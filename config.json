@@ -1,5 +1,5 @@
 {
-    "clientAddress": "0.0.0.0",
+    "clientAddress": "localhost",
     "clientPort": 57122,
     "appAddress": "127.0.0.1",
     "appPort": 57120

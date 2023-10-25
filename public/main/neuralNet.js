@@ -332,8 +332,12 @@ function handleResults(error, result) {
         return
     }
 
-    prediction = result[0]
 
+    if(result[0].freq === 'undefined') {
+        console.log("Predictions Were Found Undefined", result[0])
+    } else {
+        prediction = result[0]
+    }
 
     //console.log(result[0])
 
