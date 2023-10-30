@@ -28,7 +28,7 @@ s.meter;s.reboot;
 
 n = NetAddr("localhost", 57122);
 n.sendMsg('/kv', "markov_train");
-n.sendMsg('/kv', "osc_trigger");
+n.sendMsg('/kv', "osc_markov_trigger");
 
 
 
