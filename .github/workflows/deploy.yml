@@ -1,0 +1,30 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - deploy
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.2.0]
+    steps:
+      - uses: actions/checkout@v3
+      - name: install, build, and test
+        run: |
+          yarn install
+          yarn lint
+          yarn build
+          yarn test
+        env:
+          CI: true
+      - name: Deploy to production
+        uses: awibox/deploy-to-github-pages-action@master
+        env:
+          AUTHOR: konvasilakos
+          BUILD_PATH: public
+          GITHUB_PAGE_NAME: konvasil/ltt.github.io
+          PA_TOKEN: ${{ secrets.PA_TOKEN }}
+          USERNAME: awibox
+          EMAIL: konstantinos.vasilakos@gmail.com
