@@ -24,7 +24,7 @@ OSCdef(\lickin, {|...args|
 		oscArray.keysValuesDo({|index, value|
 			{
 				[index, userID, value].postln;
-				\notifier.changed(~keyIndex[index.interpretVal], userID, value, ~date.localtime);
+				\notifier.changed(~keyIndex[index.asInteger], userID, value, ~date.localtime);
 			}.defer;
 			});
 	}
@@ -54,7 +54,7 @@ OSCdef(\lickin, {|...args|
 	~midi = ((0..7)).collect({|i, item| (~sliders[item].value.midicps) });
 	p = Pbind(\degree, Pseq(pat, inf));
 	~lick[0] = Pdef(id.asSymbol);
-	~text.setString("\n" + p.asCode + "\n");
+	~text.setString("\n" + p.asCompileString + "\n");
 };
 
 ~selectWindow.onClose_({
@@ -70,7 +70,7 @@ OSCdef(\lickin, {|...args|
 ~keyIndex.collect({|index|
 	\listener.addNotifier(\notifier, index, {|user_id, val, notifier, time|
 	//var usr = "/%".format(key);
-	~sliders[index].value = val.interpretVal / 1000.0;
+	~sliders[index].value = val.asFloat / 1000.0;
 		~sliderWindow.name = "User " + user_id;
 	});
 	index
