@@ -4,7 +4,7 @@ var menu, button, snd, events;
 ~dict = ();
 ~date = Date.getDate;
 Pdef(\licks).fadeTime=1.0;
-~lick = NodeProxy.audio(s, 1);
+~lick = NodeProxy.audio(s, 2);
 ~lick.fadeTime = 2;
 ~funcDict = IdentityDictionary();
 ~keyIndex = [0, 1, 2, 3, 4, 5, 6, 7];
@@ -48,13 +48,24 @@ OSCdef(\lickin, {|...args|
 .front.view.layout = HLayout(
 	* ( ~sliders = {Slider() } !8) );
 
+b = NumberBox();
+b.value = 0;
+b.step_(1);
+
 ~funcDict[\pattern] = {|id, data|
 	var def, pat = data.values.asArray.collect({|val| (val.asInteger.cpsmidi.round(0.1) / 10.0).abs });
-	~def = Pbindef(id.asSymbol, \freq, Pseq(pat, inf));
+	//~def = Pbindef(id.asSymbol, \freq, Pseq(pat, inf));
 	~midi = ((0..7)).collect({|i, item| (~sliders[item].value.midicps) });
-	p = Pbind(\degree, Pseq(pat, inf));
-	~lick[0] = Pdef(id.asSymbol);
-	~text.setString("\n" + p.asCompileString + "\n");
+	~text.setString("\n" +
+		"Pdef(\\" ++
+		id.asString ++ "," +
+		"Pbind(\\dur, 1,
+\\instrument, \\default, \\degree, Pseq(" + pat.asCompileString +
+		",inf))).play; " +
+		"\n"
+	);
+	~lick[0 + b.increment.value.asInteger] = ~text.string;
+	~lick.sources.do(_.postcs);
 };
 
 ~selectWindow.onClose_({

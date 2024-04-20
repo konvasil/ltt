@@ -2,30 +2,49 @@
 // SuperCollider Workspace
 // =====================================================================
 
-SynthDef(\additive_klang, {| freq = 1, out = 0, amp = 0.5 |
-	var signal, numOsc = 8, modulo;
+SynthDef(\klang, {| freq = 1, out = 0, amp = 0.75 |
+	var signal, numOsc = 8, modulo, env, pan;
 	modulo = LFNoise1.kr(0.1).range(0.1, 1.0);
+	pan = LFNoise1.kr(1).range(-1, 1);
 	signal = Klang.ar(`[ Array.rand(numOsc, 120, 1220.0), nil, nil ], 1, 0 );
+	env = EnvGen.kr(Env.perc(0.1, 2.0), doneAction: 2);
 	signal = {signal}!2;
 	signal = signal / numOsc * amp * modulo;
-	signal = LeakDC.ar(signal);
-	ReplaceOut.ar(out, Splay.ar(signal))
+	signal = LeakDC.ar(signal*env);
+	Out.ar(out, Splay.ar(Pan2.ar(signal, pan, amp)))
 }).add;
 
 SynthDef.new(\sines, {
-	arg freq = 120.0, amp = 0.5, out = 0;
+	arg freq = 66, amp = 0.5, out = 0;
 	var signal, filter, env;
+	var pan = LFNoise1.kr(1).range(-1, 1);
 	env = EnvGen.kr(Env.perc(0.1, 2.0), doneAction: 2);
 	signal = SinOsc.ar(freq: freq, phase: pi*1.0.rand, mul: env);
-	signal = signal * 0.5;
-	Out.ar(out, signal);
+	signal = signal.dup * 0.5;
+	Out.ar(out, Pan2.ar(signal, pan, amp));
 }).add;
 
-SynthDef.new(\sines, {
-	arg freq = 120.0, amp = 0.5, out = 0;
-	var signal, filter, env;
-	env = EnvGen.kr(Env.perc(0.1, 2.0), doneAction: 2);
-	signal = SinOsc.ar(freq: freq, phase: pi*1.0.rand, mul: env);
-	signal = signal * 0.5;
-	Out.ar(out, signal);
+SynthDef(\grains, {|freq = 66, amp = 0.75, out = 0|
+	var env = EnvGen.kr(Env([0, 1, 0, 1, 0], [0.5, 0.25, 0.5, 0.1]), doneAction: 2);
+	var signal = LFSaw.ar(freq, 0.0, amp) * env;
+	Out.ar(out, signal.dup * amp);
+}).add;
+
+SynthDef(\vos, {|freq = 66, rel = 4.0, amp = 0.75, out = 0|
+	var env = EnvGen.kr(Env.sine(rel), doneAction: 2);
+	var timb = LFNoise1.kr(0.3,0.5,0.5);
+	var pan = LFNoise1.kr(1).range(-1, 1);
+    var color = LFNoise1.kr(0.3,0.5,0.5);
+	var signal = MiBraids.ar(freq, timb, color, 21) * env;
+	Out.ar(out, Pan2.ar(signal, pan, amp));
+}).add;
+
+SynthDef(\scan, {|freq = 66, rel = 4.0, amp = 0.75, out = 0|
+	var env = EnvGen.kr(Env.sine(rel), doneAction: 2);
+	var color = LFNoise1.kr(0.3,0.5,0.5);
+	var model = LFNoise0.kr(1).range(0, 47);
+	var pan = LFNoise1.kr(1).range(-1, 1);
+	var timb = LFNoise1.kr(0.3,0.5,0.5);
+    var signal = MiBraids.ar(freq, timb, color, model, mul: 0.2) * env;
+	Out.ar(out, signal*amp);
 }).add;

@@ -6,7 +6,7 @@ export default {
       user_id: "",
       connected_users: undefined,
       tempo: undefined,
-      oscWebSocket: new osc.WebSocketPort({url: "ws://127.0.0.1:8081", metadata:true}),
+      oscWebSocket: new osc.WebSocketPort({url: "ws://0.0.0.0:8081", metadata:true}),
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
       pattSync: "Pattern Play",
@@ -55,8 +55,10 @@ export default {
         if(this.markovState !== 'false') {
           var oscNotes = Object.fromEntries(Object.entries(this.osc_msg).map(([key, value]) => [key, value.toFixed(2)]));
           this.oscWebSocket.send({
-            address: '/lick',
+            address: '/lick', //sc
+            //address: '/ctrl', //tidal
             args: [
+              //send to sc the pattern structure and user id for allocation in sc.
               {
                 type: "s",
                 value: this.user_id
@@ -65,6 +67,15 @@ export default {
                 type: "s",
                 value: JSON.stringify(oscNotes, null, 4)
               }
+              //send to tidal control for speed of the pattern
+              /*{
+                type: "s",
+                value: "speed"
+              },
+              {
+                type: "f",
+                value: Object.values(oscNotes)[0]
+                }*/
             ]
           })
         } else {
