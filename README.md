@@ -27,6 +27,9 @@ The system provides a hybrid mode of interaction, and can be used in many contex
 ## Technical specifications
 The system is developed as a cross platform application running on NodeJS, and JavaScript and [SuperCollider](https://supercollider.github.io), and [ml5](https://ml5js.org) for the implementation of machine learning capabilities. I am using SC for sonification but any other audio environment able to receive OSC messages can be used.
 
+## Setup
+Download and unzip the project, enter the root folder and run "npm install" to install all necessary libraries required. Run "node server.js" to start the server. The application should show the ip address of the application running. Open a new browser page and go to "127.0.0.1:8000/main" to start the predictions and create sound. Press the instruction ![instructions](./images/instr-ltt.png). In case OSC messages are not showing in the terminal modify the file "public/main/components/user-interface.js" ip address in line: `oscWebSocket: new osc.WebSocketPort({url: "ws://yourIPAddress:8081, metadata:true})` with yours.
+
 ## Acknowledgments
 I would like to express my gratitude to Dan Shiffman and the creative coding communities of [P5.js](https://p5js.org) and [Ml5.js](https://ml5js.org) respectivelly.
 

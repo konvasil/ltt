@@ -1,5 +1,5 @@
 
-Tone.Transport.bpm.value = 120;
+Tone.Transport.bpm.value = 40;
 
 const rverb = new Tone.JCReverb(0.75).toDestination();
 var filter = new Tone.Filter(120, "highpass").toDestination();
@@ -9,22 +9,26 @@ Volume = new Tone.Volume(-12);
 const panner = new Tone.Panner(1).toDestination();
 panner.pan.rampTo(-1, 0.5);
 
-/*var ampEnv = new Tone.AmplitudeEnvelope({
+var ampEnv = new Tone.AmplitudeEnvelope({
 	"attack": 0.3,
 	"decay": 0.8,
 	"sustain": 0.85,
 	"release": 0.25
-}).toMaster();*/
+}).toMaster();
 
 
 synth = new Tone.PolySynth(Tone.FMSynth).toDestination();
-synth.chain(Volume, rverb, filter, Tone.Master);
+synth.chain(Volume, rverb, filter, ampEnv, Tone.Master);
 synth.connect(panner);
 synth.polyphony = 8;
+
 synth.set({
-	"envelope" : {
-		"attack" : 0.1
-	}
+  "envelope" : {
+    attack: 0.6,
+    decay: 0.2,
+    sustain: 0.5,
+    release: 2.5,
+  }
 });
 
 var trigDrone = function (notes) {

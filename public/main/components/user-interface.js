@@ -6,7 +6,7 @@ export default {
       user_id: "",
       connected_users: undefined,
       tempo: undefined,
-      oscWebSocket: new osc.WebSocketPort({url: "ws://0.0.0.0:8081", metadata:true}),
+      oscWebSocket: new osc.WebSocketPort({url: "ws://192.168.124.8:8081", metadata:true}),
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
       pattSync: "Pattern Play",
