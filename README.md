@@ -30,6 +30,9 @@ The system is developed as a cross platform application running on NodeJS, and J
 ## Setup
 Download and unzip the project, enter the root folder and run "npm install" to install all necessary libraries required. Run "node server.js" to start the server. The application should show the ip address of the application running. Open a new browser page and go to "127.0.0.1:8000/main" to start the predictions and create sound. Press the instruction ![instructions](./images/instr-ltt.png). In case OSC messages are not showing in the terminal modify the file "public/main/components/user-interface.js" ip address in line: `oscWebSocket: new osc.WebSocketPort({url: "ws://yourIPAddress:8081, metadata:true})` with yours.
 
+## SuperCollider Setup
+In SuperCollider open the file "SuperCollider/ltt_osc_interface_3.scd", follow the instructions in the order that are mentioned "press d to train", press: Markov States button and then Markov Notes, once these are done correctly the OSC message is set for send hit: OSC Send, the green button. If something is wrong reload the interface and start again the steps as in the order outlined.
+
 ## Acknowledgments
 I would like to express my gratitude to Dan Shiffman and the creative coding communities of [P5.js](https://p5js.org) and [Ml5.js](https://ml5js.org) respectivelly.
 
