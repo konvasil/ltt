@@ -23,9 +23,12 @@
 
   Msg: {{pattSync}}<br></br>
   Volume: {{vol}} <br></br>
-  <button class="button-info" @click="markov_train()">MARKOV STATES</button>
+  <button v-bind:class="{'white': !clicked, 'blue': clicked}"
+          class="button-danger" @click="startAudio()"> {{ audio }}
+  </button>
+<button class="button-info" @click="markov_train()">MARKOV STATES</button>
   <button @click="checkPatternIsPlaying()">Markov's notes</button>
-  <button class="button-danger" @click="playDrone()">Play Drone</button>
+  <button class="button-info" @click="playDrone()">Play Drone</button>
   <!--<button @click="submit(ip, port)">Submit</button>-->
   <form @submit.prevent="submit"></form>
   <button class="button-success" @click="osc_trigger()">OSC Send</button>

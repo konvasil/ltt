@@ -1,6 +1,6 @@
 {
-    "clientAddress": "localhost",
-    "clientPort": 57122,
-    "appAddress": "127.0.0.1",
-    "appPort": 57120
+    "localAddress": "0.0.0.0",
+    "localPort": 57122,
+    "remoteAddress": "127.0.0.1",
+    "remotePort": 57120
 }

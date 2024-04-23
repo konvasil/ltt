@@ -1,0 +1,13 @@
+let speedPat = cP "speed" :: Pattern Double
+
+d1 $ jux (rev) .
+  chop 6 .
+  striate 4 $ sound "bev*4"
+  # pan "0 1"
+  # nudge (-0.05)
+  # speed (speedPat |*10) --osc message comes as pattern from variable on top
+  # gain 0.6
+  # sz 0.3
+
+
+hush

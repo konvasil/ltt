@@ -1,40 +1,89 @@
+//Server.default.options.outDevice_("Stream").reboot;
 (
-var oldUserID,  oldData, usr = [];
-~listener = { |msg, time, replyAddr, recvPort|
-	var oscArray, checkBadVals, userID, address;
-	if(msg[0] != '/status.reply') {
-		//"At time %s received message % from % on port%\n".postf( time, msg, replyAddr, recvPort );
-		msg.postln;
-		userID = msg[0].asString.drop(1);
-		oscArray = msg[1].asString.parseJSON;
-		checkBadVals = oscArray.collect(_.notNil).reject(_.isNil);
-		if(checkBadVals != false && oldUserID != userID && oldData != oscArray) { //proceed on assigning values after check for nils in osc array.
-			"User with ID: % sent message % at time %\n".postf(userID, oscArray, time);
-			oscArray = oscArray.keysValuesDo({|index, value|
-				value = value.interpret;
-				usr = [];
-				{\notifier.changed(index.asSymbol, userID, value.max(0.01))}.defer;
-				usr.push([userID] ++ index ++ value);
+var menu, button, snd, events;
+~dict = ();
+~date = Date.getDate;
+Pdef(\licks).fadeTime=1.0;
+~lick = NodeProxy.audio(s, 2);
+~lick.fadeTime = 2;
+~funcDict = IdentityDictionary();
+~keyIndex = [0, 1, 2, 3, 4, 5, 6, 7];
+
+OSCdef(\lickin, {|...args|
+	var userID = args[0][1].asString.asSymbol;
+	var keys_2_symbols = {|v, i| (i % 2 == 0).if(v.asSymbol, v)};
+	var oscArray = args[0][2].asString.parseJSON.asPairs.collect(keys_2_symbols).asEvent; // make keys symbols and then event - not necessary, but nice
+	var checkBadVals = oscArray.collect(_.notNil).reject(_.isNil) != false;
+	if(checkBadVals) {
+		"ID: % data % at %\n".postf(userID, oscArray, ~date.localtime);
+		~dict[userID] = oscArray;
+		{
+			menu.items_(~dict.keys.asArray);
+			events = ~dict.values.asArray;
+		}.defer;
+		oscArray.keysValuesDo({|index, value|
+			{
+				[index, userID, value].postln;
+				\notifier.changed(~keyIndex[index.asInteger], userID, value, ~date.localtime);
+			}.defer;
 			});
-		};
-		oldUserID = userID;
-		oldData = oscArray;
 	}
+}, '/lick');
+
+~selectWindow = Window("Capture Patterns")
+.front.view.layout = VLayout (
+	* ([menu = PopUpMenu(), ~text = TextView().focus(true);])
+);
+
+~button = Button(~selectWindow, Rect(110, 10, 180, 20))
+.states_([["generate", Color.black, Color.green]])
+.mouseDownAction_({
+		snd = events.at(menu.value);
+})
+.action_({|butt, mod|
+	~funcDict[\pattern].value(menu.item, snd);
+});
+
+~sliderWindow = Window("LTT Streams")
+.front.view.layout = HLayout(
+	* ( ~sliders = {Slider() } !8) );
+
+b = NumberBox();
+b.value = 0;
+b.step_(1);
+
+~funcDict[\pattern] = {|id, data|
+	var def, pat = data.values.asArray.collect({|val| (val.asInteger.cpsmidi.round(0.1) / 10.0).abs });
+	//~def = Pbindef(id.asSymbol, \freq, Pseq(pat, inf));
+	~midi = ((0..7)).collect({|i, item| (~sliders[item].value.midicps) });
+	~text.setString("\n" +
+		"Pdef(\\" ++
+		id.asString ++ "," +
+		"Pbind(\\dur, 1,
+\\instrument, \\default, \\degree, Pseq(" + pat.asCompileString +
+		",inf))).play; " +
+		"\n"
+	);
+	~lick[0 + b.increment.value.asInteger] = ~text.string;
+	~lick.sources.do(_.postcs);
 };
 
-thisProcess.addOSCRecvFunc(~listener);
-
-~window = Window("LTT Streams").front.view.layout = HLayout (
-	* (~sliders = {Slider()} !3));
-\listener.addNotifier(\notifier, \0, { |key, val|
-	(~sliders[0].value = val / 1000.0);
-});
-\listener.addNotifier(\notifier, \1, { |key, val|
-	(~sliders[1].value = val / 1000.0);
-});
-\listener.addNotifier(\notifier, \2, { |key, val|
-	(~sliders[2].value = val / 1000.0);
+~selectWindow.onClose_({
+	"OSC terminated".postln;
+	~dict.clear;
+	Pdef.clear;
+	OSCdef(\lickin).free;
+	~funcDict.clear;
+	~lick.clear;
+	[\listener, \notifier].do({_.objectClosed});
 });
 
-~window.onClose_({"OSC terminated".postln; thisProcess.removeOSCRecvFunc(~listener)});
+~keyIndex.collect({|index|
+	\listener.addNotifier(\notifier, index, {|user_id, val, notifier, time|
+	//var usr = "/%".format(key);
+	~sliders[index].value = val.asFloat / 1000.0;
+		~sliderWindow.name = "User " + user_id;
+	});
+	index
+});
 )

@@ -14,7 +14,7 @@ var ampEnv = new Tone.AmplitudeEnvelope({
 	"decay": 0.8,
 	"sustain": 0.85,
 	"release": 0.25
-}).toMaster();
+}).toDestination();
 
 
 synth = new Tone.PolySynth(Tone.FMSynth).toDestination();

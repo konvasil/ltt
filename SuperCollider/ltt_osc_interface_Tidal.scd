@@ -1,4 +1,5 @@
 //Server.default.options.outDevice_("Stream").reboot;
+
 (
 var menu, button, snd, events;
 ~dict = ();
@@ -8,6 +9,9 @@ Pdef(\licks).fadeTime=1.0;
 ~lick.fadeTime = 2;
 ~funcDict = IdentityDictionary();
 ~keyIndex = [0, 1, 2, 3, 4, 5, 6, 7];
+~tidal = NetAddr("localhost", 6010);
+v = s.volume;
+v.gui;
 
 OSCdef(\lickin, {|...args|
 	var userID = args[0][1].asString.asSymbol;
@@ -48,24 +52,28 @@ OSCdef(\lickin, {|...args|
 .front.view.layout = HLayout(
 	* ( ~sliders = {Slider() } !8) );
 
-b = NumberBox();
-b.value = 0;
-b.step_(1);
+~numberBox = NumberBox();
+~numberBox.value = 0;
+~numberBox.step_(1);
 
 ~funcDict[\pattern] = {|id, data|
 	var def, pat = data.values.asArray.collect({|val| (val.asInteger.cpsmidi.round(0.1) / 10.0).abs });
 	//~def = Pbindef(id.asSymbol, \freq, Pseq(pat, inf));
 	~midi = ((0..7)).collect({|i, item| (~sliders[item].value.midicps) });
-	~text.setString("\n" +
-		"Pdef(\\" ++
-		id.asString ++ "," +
-		"Pbind(\\dur, 1,
-\\instrument, \\default, \\degree, Pseq(" + pat.asCompileString +
-		",inf))).play; " +
-		"\n"
-	);
-	~lick[0 + b.increment.value.asInteger] = ~text.string;
+	~text.setString("\n" ++ "Pdef(\\" ++
+		id.asString ++ "," ++
+		"Pbind(\\dur, 1, \\instrument, \\default, \\degree, Pseq(" ++ pat.asCompileString ++ ", 1))).play; " + "\n");
+	//~lick[0 + ~numberBox.increment.value.asInteger] = ~text.string;
 	~lick.sources.do(_.postcs);
+
+	//Forward the message to other apps like Tidal and Utopia if running;
+	if( ~dirt.notNil ){
+		~tidal.sendMsg('/ctrl', 'speed', ~midi.cpsmidi.round(0.1).asString.postln);
+		//~addressBook.sendMsg('/me', *~midi);
+	} {
+		"no tidal connection is found".warn
+
+	};
 };
 
 ~selectWindow.onClose_({
@@ -87,3 +95,4 @@ b.step_(1);
 	index
 });
 )
+

@@ -39,10 +39,10 @@ var getIPAddresses = function () {
 };
 
 var udpPort = new osc.UDPPort({
-    localAddress: config.clientAddress,
-    localPort: config.clientPort,
-    remoteAddress: config.appAddress,
-    remotePort: config.appPort
+    localAddress: config.localAddress,
+    localPort: config.localPort,
+    remoteAddress: config.remoteAddress,
+    remotePort: config.remotePort
 })
 
 udpPort.open()
@@ -55,6 +55,7 @@ udpPort.on("ready", function (oscMsg, timeTag, info) {
         console.log(" Host:", address + ", Port:", udpPort.options.localPort);
     })
     console.log(`Broadcasting OSC over UDP to ${udpPort.options.remoteAddress} Port: ${udpPort.options.remotePort}`)
+    console.log("To start lickin, go to http://127.0.0.1:8000/main in your web browser.");
 })
 
 udpPort.on("message", function (oscMessage) {
@@ -66,7 +67,7 @@ udpPort.on("error", function (err) {
 });
 
 const wss = new WebSocket.Server({
-    port:8081
+    port: 8081
 })
 
 //Listen for Web Socket connections

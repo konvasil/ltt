@@ -6,11 +6,12 @@ export default {
       user_id: "",
       connected_users: undefined,
       tempo: undefined,
-      oscWebSocket: new osc.WebSocketPort({url: "ws://192.168.124.8:8081", metadata:true}),
+      oscWebSocket: new osc.WebSocketPort({url: "ws://localhost:8081", metadata:true}),
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
       pattSync: "Pattern Play",
       synth_picked: undefined,
+      audio: "audio Off",
       vol: -12,
       disclaimer: "Best uses: modern web browsers on iPhone iOS and Android and typewriters for the best experience, mind device’s volume and use AYOR",
       osc_incoming: "",
@@ -67,15 +68,6 @@ export default {
                 type: "s",
                 value: JSON.stringify(oscNotes, null, 4)
               }
-              //send to tidal control for speed of the pattern
-              /*{
-                type: "s",
-                value: "speed"
-              },
-              {
-                type: "f",
-                value: Object.values(oscNotes)[0]
-                }*/
             ]
           })
         } else {
@@ -128,13 +120,13 @@ export default {
         this.markovState = false
       } else {
         this.markov_state = 'waiting new predictions'
-      this.markov.clearChain();
-      setTimeout(() => {
-        this.markov.addStates({state: prediction.freq, predictions: [prediction.unNormalizedValue * 1000.00, prediction.value / 2]});
-        this.markov.train();
-        this.markovState = true
-        this.markov_state = JSON.stringify(this.markov.getStates())
-      }, "500")
+        this.markov.clearChain();
+        setTimeout(() => {
+          this.markov.addStates({state: prediction.freq, predictions: [prediction.unNormalizedValue * 1000.00, prediction.value / 2]});
+          this.markov.train();
+          this.markovState = true
+          this.markov_state = JSON.stringify(this.markov.getStates())
+        }, "500")
         console.log(this.markovState)
       }
     },
@@ -142,9 +134,9 @@ export default {
       if(typeof this.markovState === 'boolean' && this.markovState === false) {
         console.log("No Values", "Train Mark")
       } else if (typeof this.markovState === 'boolean' && this.markovState === true){
-      setTimeout(() => {
-        this.osc_out()
-      }, Math.random() * (750 - 100) + 100) //max - min + min
+        setTimeout(() => {
+          this.osc_out()
+        }, Math.random() * (750 - 100) + 100) //max - min + min
         console.log("Values Found Sending OSC", this.osc_msg)
       }
     },
@@ -175,35 +167,39 @@ export default {
       var limitTempo = limitNumberWithinRange(tempo)
       Tone.Transport.bpm.rampTo(limitTempo, 0.1)
       this.tempo = limitTempo //80min - 200max
+    },
+    startAudio () {
+	      Tone.start()
+	      console.log('audio is ready')
+        this.audio = "Audio On"
+      }
+  },
+    created() {
+      this.oscWebSocket.open()
+      //alert("First press d on keyboard to train")
+
+      this.oscWebSocket.on('message', (oscMsg) => {
+        if(oscMsg.args[0].value == 'osc_markov_trigger') {
+          this.markov_notes()
+          this.osc_trigger()
+        } else if (oscMsg.args[0].value == 'markov_train') {
+          this.markov_train()
+        }
+        this.osc_incoming = JSON.stringify(oscMsg.args[0])
+      });
+
+      socket.on('newclientconnect', (data) => {
+        if(data.guests !== NaN){
+          this.connected_users = data.guests
+          this.setTempo(Tone.Transport.bpm.value + data.guests)
+        }
+      });
+    },
+    mounted(){
+      this.synth_picked = "Sine"
+      this.switch_synth('sine')
+    },
+    updated() {
+      this.user_id = socket.id
     }
-  },
-  created() {
-    this.oscWebSocket.open()
-
-    //alert("First press d on keyboard to train")
-
-    this.oscWebSocket.on('message', (oscMsg) => {
-      if(oscMsg.args[0].value == 'osc_markov_trigger') {
-        this.markov_notes()
-        this.osc_trigger()
-      } else if (oscMsg.args[0].value == 'markov_train') {
-        this.markov_train()
-      }
-      this.osc_incoming = JSON.stringify(oscMsg.args[0])
-    });
-
-    socket.on('newclientconnect', (data) => {
-      if(data.guests !== NaN){
-        this.connected_users = data.guests
-        this.setTempo(Tone.Transport.bpm.value + data.guests)
-      }
-    });
-  },
-  mounted(){
-    this.synth_picked = "Sine"
-    this.switch_synth('sine')
-  },
-  updated() {
-    this.user_id = socket.id
   }
-}

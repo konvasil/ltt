@@ -2,7 +2,7 @@
 // SuperCollider Workspace
 // =====================================================================
 
-SynthDef(\klang, {| freq = 1, out = 0, amp = 0.75 |
+SynthDef(\klang, {| freq = 1, out = 0, amp = 0.99 |
 	var signal, numOsc = 8, modulo, env, pan;
 	modulo = LFNoise1.kr(0.1).range(0.1, 1.0);
 	pan = LFNoise1.kr(1).range(-1, 1);
@@ -15,7 +15,7 @@ SynthDef(\klang, {| freq = 1, out = 0, amp = 0.75 |
 }).add;
 
 SynthDef.new(\sines, {
-	arg freq = 66, amp = 0.5, out = 0;
+	arg freq = 66, amp = 0.99, out = 0;
 	var signal, filter, env;
 	var pan = LFNoise1.kr(1).range(-1, 1);
 	env = EnvGen.kr(Env.perc(0.1, 2.0), doneAction: 2);
@@ -24,13 +24,13 @@ SynthDef.new(\sines, {
 	Out.ar(out, Pan2.ar(signal, pan, amp));
 }).add;
 
-SynthDef(\grains, {|freq = 66, amp = 0.75, out = 0|
+SynthDef(\grains, {|freq = 66, amp = 0.99, out = 0|
 	var env = EnvGen.kr(Env([0, 1, 0, 1, 0], [0.5, 0.25, 0.5, 0.1]), doneAction: 2);
 	var signal = LFSaw.ar(freq, 0.0, amp) * env;
 	Out.ar(out, signal.dup * amp);
 }).add;
 
-SynthDef(\vos, {|freq = 66, rel = 4.0, amp = 0.75, out = 0|
+SynthDef(\vos, {|freq = 66, rel = 4.0, amp = 0.99, out = 0|
 	var env = EnvGen.kr(Env.sine(rel), doneAction: 2);
 	var timb = LFNoise1.kr(0.3,0.5,0.5);
 	var pan = LFNoise1.kr(1).range(-1, 1);
@@ -39,12 +39,12 @@ SynthDef(\vos, {|freq = 66, rel = 4.0, amp = 0.75, out = 0|
 	Out.ar(out, Pan2.ar(signal, pan, amp));
 }).add;
 
-SynthDef(\scan, {|freq = 66, rel = 4.0, amp = 0.75, out = 0|
+SynthDef(\scan, {|freq = 66, rel = 4.0, amp = 0.99, out = 0|
 	var env = EnvGen.kr(Env.sine(rel), doneAction: 2);
 	var color = LFNoise1.kr(0.3,0.5,0.5);
 	var model = LFNoise0.kr(1).range(0, 47);
 	var pan = LFNoise1.kr(1).range(-1, 1);
 	var timb = LFNoise1.kr(0.3,0.5,0.5);
-    var signal = MiBraids.ar(freq, timb, color, model, mul: 0.2) * env;
+    var signal = MiBraids.ar(freq, timb, color, model, mul: 0.2) * env; //external plugin is required to be installed.
 	Out.ar(out, signal*amp);
 }).add;
