@@ -19,7 +19,6 @@ let server = httpServer.listen(PORT, () => {
     console.log(`Listening at`, PORT)
 })
 
-
 app.use(cors());
 
 var getIPAddresses = function () {
@@ -55,7 +54,7 @@ udpPort.on("ready", function (oscMsg, timeTag, info) {
         console.log(" Host:", address + ", Port:", udpPort.options.localPort);
     })
     console.log(`Broadcasting OSC over UDP to ${udpPort.options.remoteAddress} Port: ${udpPort.options.remotePort}`)
-    console.log("To start lickin, go to http://127.0.0.1:8000/main in your web browser.");
+    console.log(`To start lickin, go to http://127.0.0.1:${PORT}/main`, "in your web browser.");
 })
 
 udpPort.on("message", function (oscMessage) {
@@ -68,6 +67,7 @@ udpPort.on("error", function (err) {
 
 const wss = new WebSocket.Server({
     port: 8081
+    //server: server
 })
 
 //Listen for Web Socket connections
@@ -92,14 +92,14 @@ wss.on("connection", function (socket) {
     });
 });
 
-/*const io = require("socket.io")(server, {
-  allowRequest: (req, callback) => {
-  const noOriginHeader = req.headers.origin === undefined;
-  callback(null, noOriginHeader);
-  }//testing CORS maybe also below is better
-  })*/
+const io = require("socket.io")(httpServer, {
+  cors: {
+      origin: "http://localhost:8081/", //this upgrades the ws osc server but no idea why not the express http server!
+    methods: ["GET", "POST"]
+  }
+});
 
-const io = require("socket.io")(server, {
+/*const io = require("socket.io")(server, {
     allowRequest: (req, callback) => {
         const noOriginHeader = req.headers.origin === undefined;
         callback(null, noOriginHeader);
@@ -110,7 +110,7 @@ const io = require("socket.io")(server, {
         credentials: true,
         optionsSuccessStatus: 200
     }
-});
+});*/
 
 app.use(express.static('public'));
 app.use(express.static('main'));
@@ -124,7 +124,7 @@ app.get("/", (req, res) => {
   res.sendFile("public/main/index.css", { root: __dirname })
 })
 app.get('/k-v.png', function(req, res) {
-    res.sendFile(__dirname + '/images/k-v.png', {root: __dirname }); 
+    res.sendFile(__dirname + '/images/k-v.png', {root: __dirname });
 })
 
 app.get('/socket.io.min.js', function(req, res) {
