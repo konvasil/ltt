@@ -1,13 +1,21 @@
 let speedPat = cP "speed" :: Pattern Double
 
-d1 $ jux (rev) .
-  chop 6 .
-  striate 4 $ sound "bev*4"
+hush
+
+d1 $ jux (rev) . chop 5 . randslice 12 .
+  striate 4 $ stack[
+  sound "supersaw" # n (scale "chinese" "c a f e"),
+  cat[
+  sound "bev" # cut 2 # gain 0.1,
+  sound "alva" # cut 1 # gain 0.1 ]
+  ]
+  # nudge (-0.25)
+  # squiz "2 4 6 8"
   # pan "0 1"
   # nudge (-0.05)
-  # speed (speedPat |*10) --osc message comes as pattern from variable on top
-  # gain 0.6
-  # sz 0.3
+  # speed (speedPat |*20) --osc message comes as pattern from variable on top
+  # gain 0.75
+  # cutoff (range 100 1680 $ perlin)
+  # unit "c"
 
-
-hush
+  panic
