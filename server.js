@@ -120,6 +120,9 @@ app.use(express.static('images'));
 app.get("/", (req, res) => {
   res.sendFile("public/main/index.html", { root: __dirname })
 })
+app.get("/site.webmanifest", (req, res) => {
+    res.sendFile(__dirname + "/favicon_io/site.webmanifest", { root: __dirname })
+})
 app.get("/", (req, res) => {
   res.sendFile("public/main/index.css", { root: __dirname })
 })

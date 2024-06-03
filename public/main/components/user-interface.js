@@ -6,7 +6,7 @@ export default {
       user_id: "",
       connected_users: undefined,
       tempo: undefined,
-      oscWebSocket: new osc.WebSocketPort({url: "ws://localhost:8081", metadata:true}),
+      oscWebSocket: new osc.WebSocketPort({url: "ws://10.12.74.108:8081", metadata:true}),
       osc_config: 'undefined', //{address:"127.0.0.1", port:8081},
       osc_msg: "",
       pattSync: "Pattern Play",
@@ -20,15 +20,36 @@ export default {
       isHidden: true,
       markov: new Markov('numeric'),
       markov_state: 'untrained',
+      trainingDataString: "waiting to fetch data",
       form: {
         ip: "127.0.0.1",
         port: 57120 //or undfined
-      }
+      },
+      users: "none"
     }
   },
   methods: {
-    showID()  {
-      return this.user_id = socket.id
+    async showID()  {
+      const username = await socket.id
+      this.user_id = username
+    },
+    fetchDataTrain() {
+      const fetchURL = 'https://raw.githubusercontent.com/konvasil/ltt/main/public/main/data.json'
+      const fetchPromise = fetch(fetchURL)
+
+      fetchPromise
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then((json) =>
+          json.data.map((data) => {
+            brain.addData(data.xs, data.ys)
+            this.trainingDataString = "Data was fetched from: " + fetchURL
+          })).then((data) => dataLoaded() )
+        .catch(error => this.trainingDataString = error)
     },
     submit(address, port) {
       this.form.ip = address;
@@ -43,12 +64,6 @@ export default {
       } else if(seqIsPlaying == 'playing') {
         this.pattSync = "a pattern is already playing, rejected, try after finishes!";
       }
-    },
-    submit(address, port) {
-      this.form.ip = address;
-      this.form.port = port;
-      this.osc_config = {address: this.form.ip, port: this.form.port};
-      console.log('Submitted: ', this.form);
     },
     osc_out () {
       if(seqIsPlaying == 'false') {
@@ -83,7 +98,7 @@ export default {
     },
     markov_notes () {
       if(this.markovState !== 'false') {
-        var markov_notes = this.markov.generateRandom(8);
+        var markov_notes = this.markov.generateRandom(4); //amount of notes will be produced.
         let filterNotes = new Array();
 
         markov_notes.filter(function(note) {
@@ -125,9 +140,10 @@ export default {
           this.markov.addStates({state: prediction.freq, predictions: [prediction.unNormalizedValue * 1000.00, prediction.value / 2]});
           this.markov.train();
           this.markovState = true
-          this.markov_state = JSON.stringify(this.markov.getStates())
-        }, "500")
-        console.log(this.markovState)
+          this.markov_state =  this.markov.getPossibilities()//JSON.stringify(this.markov.getStates())
+        }, "100")
+        //console.log(this.markovState)
+        console.log(this.markov_state)
       }
     },
     osc_trigger() {
@@ -168,16 +184,14 @@ export default {
       Tone.Transport.bpm.rampTo(limitTempo, 0.1)
       this.tempo = limitTempo //80min - 200max
     },
-    startAudio () {
-	      Tone.start()
-	      console.log('audio is ready')
-        this.audio = "Audio On"
-      }
+    async startAudio () {
+	    await Tone.start()
+      console.log('audio is ready')
+      this.audio = "Audio On"
+    }
   },
     created() {
       this.oscWebSocket.open()
-      //alert("First press d on keyboard to train")
-
       this.oscWebSocket.on('message', (oscMsg) => {
         if(oscMsg.args[0].value == 'osc_markov_trigger') {
           this.markov_notes()
@@ -186,18 +200,18 @@ export default {
           this.markov_train()
         }
         this.osc_incoming = JSON.stringify(oscMsg.args[0])
-      });
-
+      })
       socket.on('newclientconnect', (data) => {
         if(data.guests !== NaN){
           this.connected_users = data.guests
           this.setTempo(Tone.Transport.bpm.value + data.guests)
         }
-      });
+      })
     },
     mounted(){
       this.synth_picked = "Sine"
       this.switch_synth('sine')
+      Tone.Transport.bpm.value = 140;
     },
     updated() {
       this.user_id = socket.id

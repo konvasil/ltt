@@ -101,7 +101,6 @@ OSCdef(\d, {|...msg|
 
 // Code Relay
 ~codeRelay = CodeRelay(~addrBook);
-
 ~historyGUI = ~history.makeWin;
 ~codeRelay.addDependant({|chatter, what, who, code|
 	if(who != ~addrBook.me.name, {

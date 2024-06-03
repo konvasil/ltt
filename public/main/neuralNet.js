@@ -2,6 +2,9 @@ let state = 'waiting', predictionMode = 'automatic', xoff = 0.0, speedCursor = 0
 let angle = 0.0;
 let jitter = 0.0;
 let prediction = 100.0;
+let dataFetched = {};
+
+let data;
 
 msg = {
   freq: Math.floor(Math.random() * 220) + 120,
@@ -21,7 +24,8 @@ let freqs = {
 const options = {
     task: 'regression',
     debug: false,
-    outputs: [4],
+    inputs: ['x', 'y'],
+    outputs: ['freq'],
     learningRate: 0.2,
     hiddenUnits: 16,
 }
@@ -30,6 +34,16 @@ const trainingOptions = {
     epochs: 10,
     batchSize: 24,
 } 
+
+function preload(){
+     const fetchPromise = fetch("https://raw.githubusercontent.com/konvasil/ltt/main/public/main/data.json")
+        fetchPromise
+            .then((response) => response.json())
+            .then((json) =>
+                json.data.map((data, i) =>
+                    brain.addData(data.xs, data.ys)
+                    ))
+}
 
 function setup(){
     var canvas = createCanvas(windowWidth/1.5, windowHeight/3)
@@ -44,6 +58,8 @@ function setup(){
         metadata: '../model/model_meta.json',
         weights: '../model/model.weights.bin'
     }
+
+    //ml5.setBackend("webgl");
 
     brain = ml5.neuralNetwork(options)
 
@@ -122,24 +138,21 @@ async function keyPressed(){
 
     //load data from GitHub
     if(key == 'f' && state == 'waiting') {
-       fetch('https://raw.githubusercontent.com/KonVas/lick-the-toad/main/public/main/data.json', {
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("HTTP error " + response.status);
-                }
-                return response.json()
-            })
-            .then(data => {
-                console.log(data)
-                brain.loadData(data, dataLoaded)
-            })
-            .catch(error => console.log(error))
+
+        const fetchPromise = fetch("https://raw.githubusercontent.com/konvasil/ltt/main/public/main/data.json")
+        fetchPromise
+            .then((response) => response.json())
+            .then((json) =>
+                json.data.map((data, i) =>
+                    brain.addData(data.xs, data.ys)
+                    ))
     }
 
     //load file from data folder
     if(key == 'd' && state == 'waiting') {
-        brain.loadData('data.json', dataLoaded)
+        var json = 'data.json';
+        brain.loadData(json, dataLoaded)
+        console.log(json)
     }
 
     //save model in model folder
@@ -158,12 +171,9 @@ async function keyPressed(){
 
 function dataLoaded(){
     console.log('data loaded')
-
     state = 'training'
-
     console.log('starting training')
     //console.log(trainingOptions)
-
     brain.normalizeData()
     brain.train(trainingOptions, whileTraining, finished)
 }
@@ -172,7 +182,6 @@ function modelLoaded() {
     console.log('model loaded')
     //state = 'prediction' //comment for training the model.
 }
-
 
 function whileTraining(epoch, loss){
     console.log(`epoch:${epoch}, loss:${Object.entries(loss)}...🍔`)
@@ -278,7 +287,7 @@ function drawTrainedData () {
     
     let radius = 7;
 
-    for(let i=0; i<data.length; i++){
+    for(let i=0; i < data.length; i++){
         let x1 = map(data[i].xs.x, 0.0, 1.0, 0.0, width) //data range: 0-1
 
         let y1 = map(data[i].xs.y, 0.0, 1.0, 0.0, height) //data range: 0-1
@@ -288,7 +297,7 @@ function drawTrainedData () {
         text(JSON.stringify(data[i].ys.freq.toFixed(2)), x1+2 + radius, y1+2 + radius) /*appears as normalized data after training (0.0 - 1.0)*/
        
         for(let j=0; j<data.length; j++){          
-           let x2= map(data[j].xs.x, 0.0, 1.0, 0.0, width) //data range: 0-1
+            let x2= map(data[j].xs.x, 0.0, 1.0, 0.0, width) //data range: 0-1
 
             let y2 = map(data[j].xs.y, 0.0, 1.0, 0.0, height) //data range: 0-1
 
@@ -301,8 +310,6 @@ function drawTrainedData () {
     }
 }
 
-
-
 function draw() {
     background(50)
     strokeWeight(2)
@@ -312,15 +319,15 @@ function draw() {
         floor( text('collecting data from users'.toUpperCase(), width/2, height/2))
     }
     if (state == 'prediction'){
-        background(51);
-        noFill();
+        background(51)
+        noFill()
         drawCursor()
         drawTrainedData()
     }
 }
 
 //predict manually using coordinates
-function mouseDragged(){
+function mouseDragged() {
     if(state == 'prediction' && predictionMode == 'manual'){
         brain.predict([mouseX, mouseY], handleResults)
     }
@@ -331,8 +338,6 @@ function handleResults(error, result) {
         console.log(error)
         return
     }
-
-
     if(result[0].freq === 'undefined') {
         console.log("Predictions Were Found Undefined", result[0])
     } else {

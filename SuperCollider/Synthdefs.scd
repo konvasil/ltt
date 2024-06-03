@@ -39,12 +39,14 @@ SynthDef(\vos, {|freq = 66, rel = 4.0, amp = 0.99, out = 0|
 	Out.ar(out, Pan2.ar(signal, pan, amp));
 }).add;
 
-SynthDef(\scan, {|freq = 66, rel = 4.0, amp = 0.99, out = 0|
-	var env = EnvGen.kr(Env.sine(rel), doneAction: 2);
+SynthDef(\scan, {|out=0,freq=440,sustain=1,pan=0,begin=0,end=1,speed=1,accelerate=0|
+	var envLength = sustain*(end-begin)/speed;
+    var line = Line.ar(begin, end, envLength, doneAction: Done.freeSelf);
+    var env = Env.asr;
+    var volume = IEnvGen.ar(env, line);
 	var color = LFNoise1.kr(0.3,0.5,0.5);
 	var model = LFNoise0.kr(1).range(0, 47);
-	var pan = LFNoise1.kr(1).range(-1, 1);
 	var timb = LFNoise1.kr(0.3,0.5,0.5);
-    var signal = MiBraids.ar(freq, timb, color, model, mul: 0.2) * env; //external plugin is required to be installed.
-	Out.ar(out, signal*amp);
+    var signal = MiBraids.ar(freq, timb, color, model, mul: 0.2) * env;
+	Out.ar(out, DirtPan.ar(signal * volume, ~dirt.numChannels, pan));
 }).add;

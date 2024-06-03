@@ -68,10 +68,12 @@ OSCdef(\lickin, {|...args|
 
 	//Forward the message to other apps like Tidal and Utopia if running;
 	if( ~dirt.notNil ){
-		~tidal.sendMsg('/ctrl', 'speed', ~midi.cpsmidi.round(0.1).asString.postln);
-		//~addressBook.sendMsg('/me', *~midi);
+		~tidal.sendMsg('/ctrl', 'speed', *~midi.cpsmidi.round(0.1).asString.postln);
+		if(~addrBook.notNil) {
+		~addrBook.sendAll('/lick/utopia', *~midi);
+		}
 	} {
-		"no tidal connection is found".warn
+		"no tidal connection is found".warn;
 
 	};
 };

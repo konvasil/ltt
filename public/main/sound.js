@@ -1,8 +1,6 @@
 
-Tone.Transport.bpm.value = 40;
-
 const rverb = new Tone.JCReverb(0.75).toDestination();
-var filter = new Tone.Filter(120, "highpass").toDestination();
+const filter = new Tone.Filter(120, "highpass").toDestination();
 
 Volume = new Tone.Volume(-12);
 
@@ -16,7 +14,6 @@ var ampEnv = new Tone.AmplitudeEnvelope({
 	"release": 0.25
 }).toDestination();
 
-
 synth = new Tone.PolySynth(Tone.FMSynth).toDestination();
 synth.chain(Volume, rverb, filter, ampEnv, Tone.Master);
 synth.connect(panner);
@@ -24,10 +21,10 @@ synth.polyphony = 8;
 
 synth.set({
   "envelope" : {
-    attack: 0.6,
-    decay: 0.2,
-    sustain: 0.5,
-    release: 2.5,
+    attack: 0.03,
+    decay: 0.5,
+    sustain: 1,
+    release: 1,
   }
 });
 
@@ -37,7 +34,7 @@ var trigDrone = function (notes) {
   {
     console.log("a pattern is playing", "wait");
   } else {
-    synth.triggerAttackRelease(notes, 8)
+    synth.triggerAttackRelease(notes, 1)
     synth.volume.value -24
    // ampEnv.triggerAttackRelease("8t");
 
@@ -64,7 +61,7 @@ function playPattern (notes) {
   seqIsPlaying = 'playing'
 
   const seq = new Tone.Sequence((time, note) => {
-    synth.triggerAttackRelease(note, "18n", Tone.now());
+    synth.triggerAttackRelease(note, "18n", '+0.05');
     console.log(note);
     count = count + 1;
     if (count === last_note) {
@@ -75,7 +72,7 @@ function playPattern (notes) {
     }
   }, midi_list).start(0)
 
-  Tone.Transport.start()
+  Tone.Transport.start("+0.1")
 
   return midi_list
 
